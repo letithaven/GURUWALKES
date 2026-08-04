@@ -567,6 +567,11 @@
       .dropdown-menu {
         max-width: 90vw;
       }
+      .notif-dropdown-menu {
+        width: min(310px, calc(100vw - 2rem)) !important;
+        right: -0.5rem !important;
+        left: auto !important;
+      }
     }
 
     @media (max-width: 575.98px) {
@@ -779,7 +784,7 @@
                 {{ unreadNotificationsCount }}
               </span>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg p-0" :class="{ 'show': isNotifOpen }" style="width: 310px; max-height: 380px; overflow-y: auto; position: absolute; right: 0; top: 100%; margin-top: 0.5rem;">
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg p-0 notif-dropdown-menu" :class="{ 'show': isNotifOpen }" style="width: 310px; max-height: 380px; overflow-y: auto; position: absolute; right: 0; top: 100%; margin-top: 0.5rem;">
               <li class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-light small"><i class="fa-solid fa-bell text-info me-1"></i> Pemberitahuan System</span>
                 <span class="badge bg-primary rounded-pill">{{ unreadNotificationsCount }} Baru</span>

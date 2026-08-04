@@ -2299,9 +2299,9 @@
       };
 
       const calculateStudentGradeAverage = (studentId) => {
-        const list = [currentGrades.value[`${studentId}_UH1`], currentGrades.value[`${studentId}_UH2`], currentGrades.value[`${studentId}_UTS`], currentGrades.value[`${studentId}_UAS`]].filter(v => v > 0);
+        const list = [currentGrades.value[`${studentId}_UH1`], currentGrades.value[`${studentId}_UH2`], currentGrades.value[`${studentId}_UTS`], currentGrades.value[`${studentId}_UAS`]].filter(v => v !== undefined && v !== null && v !== '' && !isNaN(v) && Number(v) > 0);
         if (list.length === 0) return 0;
-        return (list.reduce((a, b) => a + b, 0) / list.length).toFixed(1);
+        return (list.reduce((a, b) => a + Number(b), 0) / list.length).toFixed(1);
       };
 
       const saveGradesBulk = async () => {
@@ -2310,11 +2310,19 @@
         selectedClassStudents.value.forEach(s => {
           ['UH1', 'UH2', 'UTS', 'UAS'].forEach(t => {
             const sc = currentGrades.value[`${s.id}_${t}`];
-            if (sc !== undefined && sc !== null && sc !== '') gradesPayload.push({ student_id: s.id, type: t, score: Number(sc) });
+            const hasExisting = grades.value.some(g => String(g.student_id) === String(s.id) && String(g.type) === String(t));
+            
+            // Kirim jika diisi angka ATAU jika sebelumnya sudah ada di database (sehingga bisa dikosongkan/dihapus)
+            if ((sc !== undefined && sc !== null && sc !== '') || hasExisting) {
+              const val = (sc === '' || sc === null || sc === undefined || isNaN(sc)) ? '' : Number(sc);
+              gradesPayload.push({ student_id: s.id, type: t, score: val });
+            }
           });
         });
+
         if (gradesPayload.length === 0) { Swal.fire('Peringatan', 'Belum ada nilai.', 'warning'); return; }
         await apiRequest('saveGradesBulk', { class_id: selectedClassId.value, subject_id: selectedSubjectId.value, grades: gradesPayload }, true);
+        await loadGradesData();
         Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Nilai disimpan', showConfirmButton: false, timer: 1800 });
       };
 

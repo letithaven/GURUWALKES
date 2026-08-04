@@ -299,6 +299,49 @@
       font-size: 0.875rem;
     }
 
+    /* Dashboard stat cards: gradient circular icon instead of a plain flat box */
+    .stat-card {
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .stat-icon-primary {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(99, 102, 241, 0.1));
+      color: #818cf8;
+      box-shadow: 0 0 18px rgba(99, 102, 241, 0.25);
+    }
+    .stat-icon-success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(16, 185, 129, 0.1));
+      color: #34d399;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);
+    }
+    .stat-icon-warning {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(245, 158, 11, 0.1));
+      color: #fbbf24;
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);
+    }
+    .stat-icon-info {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(6, 182, 212, 0.1));
+      color: #22d3ee;
+      box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+    }
+
     .btn-att {
       width: 40px;
       height: 40px;
@@ -864,9 +907,11 @@
 
           <div class="row g-3 mb-4">
             <div class="col-md-3">
-              <div class="card p-3">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="p-3 rounded-3 bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30"><i class="fa-solid fa-users fa-xl"></i></div>
+                  <div class="stat-icon stat-icon-primary">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 20v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ selectedClassStudents.length }}</h2>
                     <small class="text-muted fw-medium">Total Siswa ({{ currentClassName }})</small>
@@ -875,9 +920,11 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="p-3 rounded-3 bg-success bg-opacity-20 text-success border border-success border-opacity-30"><i class="fa-solid fa-user-check fa-xl"></i></div>
+                  <div class="stat-icon stat-icon-success">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="m9 16 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ attendancePercentage }}%</h2>
                     <small class="text-muted fw-medium">Rata-Rata Kehadiran</small>
@@ -886,9 +933,11 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="p-3 rounded-3 bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30"><i class="fa-solid fa-book-open fa-xl"></i></div>
+                  <div class="stat-icon stat-icon-warning">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ journals.length }}</h2>
                     <small class="text-muted fw-medium">Total Jurnal Mengajar</small>
@@ -897,9 +946,11 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="p-3 rounded-3 bg-info bg-opacity-20 text-info border border-info border-opacity-30"><i class="fa-solid fa-chalkboard fa-xl"></i></div>
+                  <div class="stat-icon stat-icon-info">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 11h.01M15 11h.01M9 15h.01M15 15h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ classes.length }}</h2>
                     <small class="text-muted fw-medium">Total Kelas Dikelola</small>

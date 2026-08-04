@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   
   <!-- Bootstrap 5.3 CSS -->
@@ -47,6 +46,42 @@
       --border-glow: rgba(99, 102, 241, 0.3);
       --sidebar-width: 260px;
       --sidebar-collapsed-width: 72px;
+    }
+
+    /* Harmonized SweetAlert2 Dark Futuristic Theme */
+    .swal2-popup {
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 1rem !important;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+    }
+    .swal2-title, .swal2-html-container {
+      color: #f8fafc !important;
+    }
+    .swal2-input, .swal2-textarea {
+      background-color: rgba(7, 10, 18, 0.9) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 0.6rem !important;
+    }
+    .swal2-input:focus, .swal2-textarea:focus {
+      border-color: var(--accent-cyan) !important;
+      box-shadow: 0 0 12px var(--accent-cyan-glow) !important;
+    }
+    .swal2-confirm {
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan)) !important;
+      border: none !important;
+      box-shadow: 0 4px 15px var(--primary-glow) !important;
+      font-weight: 600 !important;
+      border-radius: 0.6rem !important;
+    }
+    .swal2-cancel {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #f8fafc !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 0.6rem !important;
     }
 
     ::-webkit-scrollbar {
@@ -281,6 +316,9 @@
       position: sticky;
       top: 0;
       z-index: 999;
+      flex-wrap: nowrap;
+      gap: 1rem;
+      overflow-x: auto;
     }
 
     .content-wrapper {
@@ -341,6 +379,7 @@
 
     .stat-card {
       transition: transform 0.25s ease, border-color 0.25s ease;
+      min-height: 140px;
     }
     .stat-card:hover {
       transform: translateY(-3px);
@@ -539,8 +578,8 @@
         display: none;
       }
       .app-header {
-        flex-wrap: wrap;
-        row-gap: 0.6rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
         padding: 0.75rem 1rem;
       }
       .content-wrapper {
@@ -562,7 +601,6 @@
 
   <div class="top-progress-bar" v-if="loading" :style="{ width: loadingProgress + '%' }"></div>
 
-  <!-- Public Report View Mode for Parents -->
   <div v-if="isPublicView" class="container py-4">
     <div class="card p-4 text-light bg-dark">
       <div class="text-center mb-4 pb-3 border-bottom border-secondary">
@@ -704,7 +742,7 @@
 
     <div class="app-main" :class="{ 'expanded': sidebarCollapsed, 'auth-mode': !currentUser }">
       <header class="app-header" v-if="currentUser">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-2">
           <button class="btn btn-outline-cyber btn-sm mobile-menu-toggle" @click="toggleMobileMenu" title="Buka Menu">
             <i class="fa-solid fa-bars"></i>
           </button>
@@ -713,7 +751,7 @@
             <i class="fa-solid" :class="sidebarCollapsed ? 'fa-indent' : 'fa-bars'"></i>
           </button>
           
-          <div class="d-flex align-items-center gap-2 header-class-select">
+          <div class="d-flex align-items-center gap-1">
             <i class="fa-solid fa-school text-info"></i>
             <select class="form-select form-select-sm fw-bold border-0" v-model="selectedClassId" style="width: auto;" @change="onClassChange">
               <option value="" disabled>-- Pilih Kelas Aktif --</option>
@@ -721,15 +759,15 @@
             </select>
           </div>
 
-          <button class="btn btn-outline-cyber btn-sm d-flex align-items-center gap-1 ms-2" @click="syncAllData" :disabled="loading" title="Sinkronkan & Refresh Data">
+          <button class="btn btn-outline-cyber btn-sm d-flex align-items-center gap-1" @click="syncAllData" :disabled="loading" title="Sinkronkan & Refresh Data">
             <i class="fa-solid" :class="loading ? 'fa-circle-notch fa-spin text-info' : 'fa-rotate'"></i>
-            <span class="d-none d-md-inline">{{ loading ? 'Syncing...' : 'Sync Data' }}</span>
+            <span class="d-none d-md-inline">{{ loading ? 'Sync...' : 'Sync' }}</span>
           </button>
         </div>
 
-        <div class="d-flex align-items-center gap-3">
-          <!-- Dual Time Badge (Local Time & WIB Time) -->
-          <div class="d-none d-lg-flex align-items-center gap-2 px-3 py-1 bg-dark bg-opacity-60 border border-secondary rounded-pill text-info small shadow-sm">
+        <div class="d-flex align-items-center gap-2 flex-nowrap overflow-x-auto py-1">
+          <!-- Dual Time Badge with Compact Official Date & Time (e.g. Wed, 05 Aug 2026) -->
+          <div class="d-flex align-items-center gap-2 px-3 py-1 bg-dark bg-opacity-60 border border-secondary rounded-pill text-info small shadow-sm text-nowrap">
             <i class="fa-solid fa-calendar-days text-accent"></i>
             <span class="fw-semibold text-light">{{ currentDateString }}</span>
             <span class="text-muted">•</span>
@@ -739,9 +777,9 @@
             <span class="fw-bold font-monospace text-warning" title="Waktu Indonesia Barat (GMT+7)">WIB: {{ currentWibTimeString }}</span>
           </div>
 
-          <!-- Read-Only Badge Indicator -->
-          <span v-if="isReadOnlyUser" class="badge bg-info text-dark fw-bold px-2 py-1">
-            <i class="fa-solid fa-shield-halved me-1"></i> Mode Supervisi Kepala Madrasah & Supervisor (Read-Only)
+          <!-- Shortened Supervision Badge -->
+          <span v-if="isReadOnlyUser" class="badge bg-info text-dark fw-bold px-2 py-1 text-nowrap" title="Mode Supervisi Kepala Madrasah & Supervisor (Read-Only)">
+            <i class="fa-solid fa-shield-halved me-1"></i> Mode Supervisi
           </span>
 
           <div class="dropdown">
@@ -798,7 +836,7 @@
                   </div>
                   <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
                     <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
-                    {{ loading ? 'Menghubungkan ke Database...' : 'Masuk System Guru' }}
+                    {{ loading ? 'Mohon tunggu, loading DB...' : 'Masuk System Guru' }}
                   </button>
                 </form>
 
@@ -825,7 +863,7 @@
                   </div>
                   <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
                     <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
-                    {{ loading ? 'Menghubungkan ke Database...' : 'Daftar Akun Baru' }}
+                    {{ loading ? 'Mohon tunggu, loading DB...' : 'Daftar Akun Baru' }}
                   </button>
                 </form>
 
@@ -868,7 +906,7 @@
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ selectedClassStudents.length }}</h2>
-                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Total Siswa ({{ currentClassName }})</small>
+                    <small class="text-muted fw-medium d-block">Total Siswa ({{ currentClassName }})</small>
                   </div>
                 </div>
               </div>
@@ -881,7 +919,7 @@
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ attendancePercentage }}%</h2>
-                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Rata-Rata Kehadiran</small>
+                    <small class="text-muted fw-medium d-block">Rata-Rata Kehadiran</small>
                   </div>
                 </div>
               </div>
@@ -894,7 +932,7 @@
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ journals.length }}</h2>
-                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Total Jurnal Mengajar</small>
+                    <small class="text-muted fw-medium d-block">Total Jurnal Mengajar</small>
                   </div>
                 </div>
               </div>
@@ -907,7 +945,7 @@
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ classes.length }}</h2>
-                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Total Kelas Dikelola</small>
+                    <small class="text-muted fw-medium d-block">Total Kelas Dikelola</small>
                   </div>
                 </div>
               </div>
@@ -1558,7 +1596,6 @@
     </div>
   </div>
 
-  <!-- Profile & NIP Edit Modal -->
   <div class="modal fade" id="profileModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content card border-secondary text-light">
@@ -1619,7 +1656,6 @@
       const errorLogs = ref(JSON.parse(localStorage.getItem('digitalisasi_error_logs') || '[]'));
       const profileForm = ref({ nama_lengkap: '', nip: '' });
 
-      // Local Date Helper (Fixes UTC timezone shift for WIT/WIB/WITA)
       const getLocalDateString = (d = new Date()) => {
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -1627,7 +1663,6 @@
         return `${year}-${month}-${day}`;
       };
 
-      // Dual Time Clock & Calendar (Local Time & WIB Time)
       const currentTimeString = ref('');
       const currentWibTimeString = ref('');
       const currentDateString = ref('');
@@ -1635,11 +1670,9 @@
 
       const updateLiveClock = () => {
         const now = new Date();
-        currentDateString.value = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-        currentTimeString.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
-        // WIB Time (GMT+7 Asia/Jakarta)
-        currentWibTimeString.value = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        currentDateString.value = now.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+        currentTimeString.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
+        currentWibTimeString.value = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
       };
 
       const logError = (err, action) => {
@@ -1855,7 +1888,6 @@
         students.value = Array.isArray(stList) ? stList : [];
         journals.value = Array.isArray(jList) ? jList : [];
 
-        // Class is not pre-selected upon login
         selectedClassId.value = '';
 
         if (subjects.value.length > 0 && !selectedSubjectId.value) {
@@ -1878,7 +1910,7 @@
             position: 'top-end',
             icon: 'success',
             title: `Selamat datang, ${currentUser.value.nama_lengkap}!`,
-            text: 'Data database siap.',
+            text: 'Database siap.',
             showConfirmButton: false,
             timer: 2500,
             timerProgressBar: true
@@ -2154,7 +2186,7 @@
           if (st === 'H') H++; else if (st === 'I') I++; else if (st === 'S') S++; else if (st === 'A') A++;
         }
         const total = H + I + S + A;
-        return { H, I, S, A, percent: total === 0 ? 100 : ((H / total) * 100).toFixed(0) };
+        return { H, I, S, A, percent: total === 0 ? 0 : ((H / total) * 100).toFixed(0) };
       };
 
       const exportMonthlyAttExcel = () => {
@@ -2247,7 +2279,7 @@
       const calculateStudentAttPercentReport = (studentId) => {
         const st = getStudentAttStatsReport(studentId);
         const tot = st.H + st.I + st.S + st.A;
-        return tot === 0 ? 100 : ((st.H / tot) * 100).toFixed(0);
+        return tot === 0 ? 0 : ((st.H / tot) * 100).toFixed(0);
       };
 
       const attendancePercentage = computed(() => {
@@ -2257,7 +2289,7 @@
           const st = getStudentAttStatsReport(s.id);
           totalH += st.H; totalDays += (st.H + st.I + st.S + st.A);
         });
-        return totalDays === 0 ? 100 : ((totalH / totalDays) * 100).toFixed(0);
+        return totalDays === 0 ? 0 : ((totalH / totalDays) * 100).toFixed(0);
       });
 
       const copyPublicLink = () => {

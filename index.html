@@ -48,7 +48,6 @@
       --sidebar-collapsed-width: 72px;
     }
 
-    /* Harmonized SweetAlert2 Dark Futuristic Theme */
     .swal2-popup {
       background: #0f172a !important;
       color: #f8fafc !important;
@@ -380,6 +379,10 @@
     .stat-card {
       transition: transform 0.25s ease, border-color 0.25s ease;
       min-height: 140px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .stat-card:hover {
       transform: translateY(-3px);
@@ -766,7 +769,6 @@
         </div>
 
         <div class="d-flex align-items-center gap-2 flex-nowrap overflow-x-auto py-1">
-          <!-- Dual Time Badge with Compact Official Date & Time (e.g. Wed, 05 Aug 2026) -->
           <div class="d-flex align-items-center gap-2 px-3 py-1 bg-dark bg-opacity-60 border border-secondary rounded-pill text-info small shadow-sm text-nowrap">
             <i class="fa-solid fa-calendar-days text-accent"></i>
             <span class="fw-semibold text-light">{{ currentDateString }}</span>
@@ -777,8 +779,7 @@
             <span class="fw-bold font-monospace text-warning" title="Waktu Indonesia Barat (GMT+7)">WIB: {{ currentWibTimeString }}</span>
           </div>
 
-          <!-- Shortened Supervision Badge -->
-          <span v-if="isReadOnlyUser" class="badge bg-info text-dark fw-bold px-2 py-1 text-nowrap" title="Mode Supervisi Kepala Madrasah & Supervisor (Read-Only)">
+          <span v-if="isReadOnlyUser" class="badge bg-info text-dark fw-bold px-2 py-1 text-nowrap" title="Mode Supervisi (Read-Only)">
             <i class="fa-solid fa-shield-halved me-1"></i> Mode Supervisi
           </span>
 
@@ -899,7 +900,7 @@
 
           <div class="row g-3 mb-4" v-if="selectedClassId">
             <div class="col-md-3">
-              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-primary">
                     <i class="fa-solid fa-user-group"></i>
@@ -912,7 +913,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-success">
                     <i class="fa-solid fa-circle-check"></i>
@@ -925,7 +926,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-warning">
                     <i class="fa-solid fa-book-bookmark"></i>
@@ -938,7 +939,7 @@
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
+              <div class="card p-3 stat-card">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-info">
                     <i class="fa-solid fa-school"></i>
@@ -1636,7 +1637,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-  const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbwIR8Xf7IlAms8ELnSDtIp8RCtUlNHIIhf3CSSCkBKmNVVuduKMQ2iBWStfDVmPRtzl3A/exec';
+  const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbw71AsqJ9ygJPGbts1Mhklwjwloc9EEZEGE7fv2XZn-0C8-uxLVLDxcRolmIlenDn2S-w/exec';
   const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
 
   createApp({

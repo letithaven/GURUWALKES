@@ -1750,6 +1750,34 @@
         return [];
       };
 
+      // Performs the raw fetch + text read + JSON parse for one attempt.
+      // Throws a descriptive Error if the response isn't valid JSON, instead
+      // of letting a cryptic "JSON.parse: unexpected character" bubble up.
+      const fetchAndParse = async (action, payload) => {
+        const res = await fetch(apiUrl.value, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, payload, token: token.value })
+        });
+
+        const rawText = await res.text();
+
+        let json;
+        try {
+          json = JSON.parse(rawText);
+        } catch (parseErr) {
+          const looksLikeHtml = /^\s*</.test(rawText);
+          if (!res.ok) {
+            throw new Error(`Server merespon dengan status ${res.status}. Kemungkinan URL API salah atau Web App belum ter-deploy dengan benar.`);
+          }
+          if (looksLikeHtml) {
+            throw new Error('Server membalas halaman HTML, bukan data. Kemungkinan izin akses Web App Google Apps Script belum diatur ke "Anyone", atau URL API tidak tepat. Coba periksa di menu Pengaturan API.');
+          }
+          throw new Error('Respon server tidak dapat dibaca (bukan format JSON yang valid). Ini biasanya sementara — silakan coba lagi.');
+        }
+        return json;
+      };
+
       const apiRequest = async (action, payload = {}) => {
         if (isDemoMode.value) {
           return handleDemoRequest(action, payload);
@@ -1758,12 +1786,15 @@
         const timer = startProgressAnimation();
 
         try {
-          const res = await fetch(apiUrl.value, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action, payload, token: token.value })
-          });
-          const json = await res.json();
+          let json;
+          try {
+            json = await fetchAndParse(action, payload);
+          } catch (firstErr) {
+            // Google Apps Script's exec -> googleusercontent.com redirect is
+            // occasionally flaky; retry once before surfacing an error.
+            json = await fetchAndParse(action, payload);
+          }
+
           if (!json.success) {
             if (json.error && json.error.toLowerCase().includes('token tidak valid')) {
               logout();

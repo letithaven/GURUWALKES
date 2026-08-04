@@ -861,53 +861,53 @@
 
           <div class="row g-3 mb-4" v-if="selectedClassId">
             <div class="col-md-3">
-              <div class="card p-3 stat-card">
+              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-primary">
                     <i class="fa-solid fa-user-group"></i>
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ selectedClassStudents.length }}</h2>
-                    <small class="text-muted fw-medium">Total Siswa ({{ currentClassName }})</small>
+                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Total Siswa ({{ currentClassName }})</small>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card">
+              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-success">
                     <i class="fa-solid fa-circle-check"></i>
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ attendancePercentage }}%</h2>
-                    <small class="text-muted fw-medium">Rata-Rata Kehadiran</small>
+                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Rata-Rata Kehadiran</small>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card">
+              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-warning">
                     <i class="fa-solid fa-book-bookmark"></i>
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ journals.length }}</h2>
-                    <small class="text-muted fw-medium">Total Jurnal Mengajar</small>
+                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Total Jurnal Mengajar</small>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-md-3">
-              <div class="card p-3 stat-card">
+              <div class="card p-3 stat-card h-100 d-flex flex-column justify-content-center">
                 <div class="d-flex align-items-center gap-3">
                   <div class="stat-icon stat-icon-info">
                     <i class="fa-solid fa-school"></i>
                   </div>
                   <div>
                     <h2 class="fw-bold mb-0 text-light">{{ classes.length }}</h2>
-                    <small class="text-muted fw-medium">Total Kelas Dikelola</small>
+                    <small class="text-muted fw-medium d-block" style="min-height: 2rem;">Total Kelas Dikelola</small>
                   </div>
                 </div>
               </div>

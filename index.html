@@ -277,6 +277,22 @@
       color: #ffffff;
     }
 
+    .btn-cyber:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .btn-att:active {
+      transform: scale(0.9);
+    }
+    .btn-att.active {
+      animation: attPop 0.25s ease-out;
+    }
+    @keyframes attPop {
+      0% { transform: scale(0.85); }
+      60% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
     .btn-outline-cyber {
       background: transparent;
       border: 1px solid var(--primary);
@@ -305,6 +321,13 @@
     }
     .stat-card:hover {
       transform: translateY(-3px);
+    }
+    .stat-card h2 {
+      font-size: 1.85rem;
+      letter-spacing: -0.5px;
+    }
+    .stat-card small {
+      letter-spacing: 0.2px;
     }
 
     .stat-icon {
@@ -340,6 +363,90 @@
       background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(6, 182, 212, 0.1));
       color: #22d3ee;
       box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+    }
+
+    /* Empty state: icon + message (+ optional action) instead of a bare text row */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 2.5rem 1rem;
+      color: var(--text-dim);
+    }
+    .empty-state-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-dim);
+      margin-bottom: 0.25rem;
+    }
+    .empty-state-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    .empty-state-title {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .empty-state-action {
+      margin-top: 0.4rem;
+    }
+
+    /* Subtle fade-in for whichever tab section Vue just mounted (v-if swaps
+       the element in/out of the DOM, so this animation re-triggers on every
+       tab switch without needing any JS transition wiring). */
+    .content-wrapper > div {
+      animation: tabFadeIn 0.25s ease-out;
+    }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Auth page: decorative blurred orbs behind the login/register card */
+    .auth-page-container {
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.55;
+      animation: orbFloat 8s ease-in-out infinite;
+    }
+    .auth-orb-1 {
+      width: 320px;
+      height: 320px;
+      top: -80px;
+      left: -100px;
+      background: radial-gradient(circle, var(--primary), transparent 70%);
+    }
+    .auth-orb-2 {
+      width: 280px;
+      height: 280px;
+      bottom: -100px;
+      right: -80px;
+      background: radial-gradient(circle, var(--accent-cyan), transparent 70%);
+      animation-delay: -4s;
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(20px, -20px); }
+    }
+    .auth-card {
+      position: relative;
+      z-index: 1;
     }
 
     .btn-att {
@@ -645,7 +752,14 @@
                 <td class="fw-extrabold text-info">{{ calculatePublicStudentPercent(s.id) }}%</td>
               </tr>
               <tr v-if="publicReportData.students.length === 0">
-                <td colspan="8" class="text-center py-4 text-muted">Belum ada data presensi.</td>
+                <td colspan="8" class="p-0">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <span class="empty-state-title">Belum ada data presensi</span>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -831,10 +945,12 @@
       <div class="content-wrapper">
 
         <!-- Auth Page -->
-        <div v-if="!currentUser" class="container py-5">
+        <div v-if="!currentUser" class="container py-5 auth-page-container">
+          <div class="auth-orb auth-orb-1"></div>
+          <div class="auth-orb auth-orb-2"></div>
           <div class="row justify-content-center">
             <div class="col-md-5">
-              <div class="card p-4 p-md-5 shadow-lg">
+              <div class="card p-4 p-md-5 shadow-lg auth-card">
                 <div class="text-center mb-4">
                   <div class="brand-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem;">
                     <i class="fa-solid fa-graduation-cap"></i>
@@ -989,7 +1105,16 @@
                       <td><small class="text-muted">{{ j.activities }}</small></td>
                     </tr>
                     <tr v-if="journals.length === 0">
-                      <td colspan="4" class="text-center py-4 text-muted">Belum ada catatan jurnal mengajar.</td>
+                      <td colspan="4" class="p-0">
+                        <div class="empty-state">
+                          <div class="empty-state-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </div>
+                          <span class="empty-state-title">Belum ada catatan jurnal mengajar</span>
+                          <small>Jurnal KBM yang Anda simpan akan muncul di sini.</small>
+                          <button class="btn btn-cyber btn-sm empty-state-action" @click="currentTab = 'journal'"><i class="fa-solid fa-plus me-1"></i> Isi Jurnal Sekarang</button>
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1117,7 +1242,16 @@
                       </td>
                     </tr>
                     <tr v-if="selectedClassStudents.length === 0">
-                      <td colspan="5" class="text-center py-4 text-muted">Belum ada data siswa di kelas ini.</td>
+                      <td colspan="5" class="p-0">
+                        <div class="empty-state">
+                          <div class="empty-state-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </div>
+                          <span class="empty-state-title">Belum ada data siswa di kelas ini</span>
+                          <small>Tambahkan siswa satu per satu atau import dari Excel.</small>
+                          <button class="btn btn-cyber btn-sm empty-state-action" @click="openStudentModal()"><i class="fa-solid fa-user-plus me-1"></i> Tambah Siswa</button>
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1307,7 +1441,14 @@
                         <td class="fw-bold text-light">{{ getStudentRecapTotals(s.id).percent }}%</td>
                       </tr>
                       <tr v-if="selectedClassStudents.length === 0">
-                        <td :colspan="daysInSelectedMonth + 7" class="text-center py-4 text-muted">Belum ada siswa di kelas ini.</td>
+                        <td :colspan="daysInSelectedMonth + 7" class="p-0">
+                          <div class="empty-state">
+                            <div class="empty-state-icon">
+                              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                            </div>
+                            <span class="empty-state-title">Belum ada siswa di kelas ini</span>
+                          </div>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -1438,7 +1579,15 @@
                       </td>
                     </tr>
                     <tr v-if="journals.length === 0">
-                      <td colspan="5" class="text-center py-4 text-muted">Belum ada data jurnal mengajar.</td>
+                      <td colspan="5" class="p-0">
+                        <div class="empty-state">
+                          <div class="empty-state-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </div>
+                          <span class="empty-state-title">Belum ada data jurnal mengajar</span>
+                          <small>Gunakan form di atas untuk mencatat kegiatan KBM pertama Anda.</small>
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1524,7 +1673,14 @@
                     <td class="fw-extrabold text-info fs-6">{{ calculateStudentAttPercentReport(s.id) }}%</td>
                   </tr>
                   <tr v-if="selectedClassStudents.length === 0">
-                    <td colspan="8" class="text-center py-4 text-muted">Belum ada siswa terdaftar.</td>
+                    <td colspan="8" class="p-0">
+                      <div class="empty-state">
+                        <div class="empty-state-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                        </div>
+                        <span class="empty-state-title">Belum ada siswa terdaftar</span>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>

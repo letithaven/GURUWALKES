@@ -728,13 +728,15 @@
         </div>
 
         <div class="d-flex align-items-center gap-3">
-          <!-- Live Clock & Calendar Badge (Pilihan 1) -->
+          <!-- Dual Time Badge (Local Time & WIB Time) -->
           <div class="d-none d-lg-flex align-items-center gap-2 px-3 py-1 bg-dark bg-opacity-60 border border-secondary rounded-pill text-info small shadow-sm">
             <i class="fa-solid fa-calendar-days text-accent"></i>
             <span class="fw-semibold text-light">{{ currentDateString }}</span>
             <span class="text-muted">•</span>
             <i class="fa-solid fa-clock text-accent"></i>
-            <span class="fw-bold font-monospace text-info">{{ currentTimeString }}</span>
+            <span class="fw-bold font-monospace text-info">Lokal: {{ currentTimeString }}</span>
+            <span class="text-muted">|</span>
+            <span class="fw-bold font-monospace text-warning" title="Waktu Indonesia Barat (GMT+7)">WIB: {{ currentWibTimeString }}</span>
           </div>
 
           <!-- Read-Only Badge Indicator -->
@@ -796,7 +798,7 @@
                   </div>
                   <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
                     <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
-                    {{ loading ? 'Mohon tunggu, loading DB...' : 'Masuk System Guru' }}
+                    {{ loading ? 'Menghubungkan ke Database...' : 'Masuk System Guru' }}
                   </button>
                 </form>
 
@@ -823,7 +825,7 @@
                   </div>
                   <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
                     <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
-                    {{ loading ? 'Mohon tunggu, loading DB...' : 'Daftar Akun Baru' }}
+                    {{ loading ? 'Menghubungkan ke Database...' : 'Daftar Akun Baru' }}
                   </button>
                 </form>
 
@@ -1625,8 +1627,9 @@
         return `${year}-${month}-${day}`;
       };
 
-      // Live Clock & Calendar (Pilihan 1)
+      // Dual Time Clock & Calendar (Local Time & WIB Time)
       const currentTimeString = ref('');
+      const currentWibTimeString = ref('');
       const currentDateString = ref('');
       let clockTimer = null;
 
@@ -1634,6 +1637,9 @@
         const now = new Date();
         currentDateString.value = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
         currentTimeString.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        // WIB Time (GMT+7 Asia/Jakarta)
+        currentWibTimeString.value = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' });
       };
 
       const logError = (err, action) => {
@@ -1849,7 +1855,7 @@
         students.value = Array.isArray(stList) ? stList : [];
         journals.value = Array.isArray(jList) ? jList : [];
 
-        // No class selected initially upon login
+        // Class is not pre-selected upon login
         selectedClassId.value = '';
 
         if (subjects.value.length > 0 && !selectedSubjectId.value) {
@@ -2321,7 +2327,7 @@
         loadMonthlyRecapData, getStudentDayStatus, getStudentRecapTotals, exportMonthlyAttExcel, loadGradesData,
         calculateStudentGradeAverage, saveGradesBulk, saveJournal, resetJournalForm, deleteJournal, loadReportTab,
         getStudentAttStatsReport, calculateStudentAttPercentReport, copyPublicLink, printReport, saveApiUrl, testApiConnection,
-        errorLogs, clearErrorLogs, currentTimeString, currentDateString
+        errorLogs, clearErrorLogs, currentTimeString, currentWibTimeString, currentDateString
       };
     }
   }).mount('#app');

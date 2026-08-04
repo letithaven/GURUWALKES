@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyClassHub - Administrasi Mengajar Guru (Futuristic Edition)</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- SheetJS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a12;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.4);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.35);
+      --accent-purple: #a855f7;
+      --success-color: #10b981;
+      --danger-color: #f43f5e;
+      --warning-color: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(99, 102, 241, 0.25);
+      --sidebar-width: 260px;
+      --sidebar-collapsed-width: 72px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(7, 10, 18, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.35);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(6, 182, 212, 0.7);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .card, .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+      border-color: var(--border-glow);
+    }
+
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .app-sidebar {
+      width: var(--sidebar-width);
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .app-sidebar.collapsed {
+      width: var(--sidebar-collapsed-width);
+    }
+
+    .app-sidebar.collapsed .sidebar-brand span,
+    .app-sidebar.collapsed .menu-link span,
+    .app-sidebar.collapsed .user-info-text,
+    .app-sidebar.collapsed .btn-hide-text {
+      display: none !important;
+    }
+
+    .app-sidebar.collapsed .menu-link {
+      justify-content: center;
+      padding: 0.75rem 0;
+    }
+
+    .app-sidebar.collapsed .menu-link i {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--primary-glow);
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0 0.75rem;
+      margin: 0;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .menu-item {
+      margin-bottom: 0.35rem;
+    }
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.925rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .menu-link:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent-cyan);
+    }
+
+    .menu-item.active .menu-link {
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #ffffff;
+      box-shadow: 0 4px 15px var(--primary-glow);
+      font-weight: 600;
+    }
+
+    .app-main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .app-main.expanded {
+      margin-left: var(--sidebar-collapsed-width);
+    }
+
+    .app-main.auth-mode {
+      margin-left: 0 !important;
+    }
+
+    .app-header {
+      background: rgba(11, 15, 25, 0.7);
+      backdrop-filter: blur(16px);
+      padding: 0.85rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    .content-wrapper {
+      padding: 1.75rem;
+      flex: 1;
+    }
+
+    .form-control, .form-select {
+      background-color: rgba(15, 23, 42, 0.8) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-main) !important;
+      border-radius: 0.6rem;
+      padding: 0.6rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent-cyan) !important;
+      box-shadow: 0 0 12px var(--accent-cyan-glow) !important;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-dim) !important;
+    }
+
+    select option {
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+
+    .btn-cyber {
+      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 15px var(--primary-glow);
+      transition: all 0.2s ease;
+    }
+
+    .btn-cyber:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-cyan-glow);
+      color: #ffffff;
+    }
+
+    .btn-outline-cyber {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline-cyber:hover {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .text-muted {
+      color: var(--text-muted) !important;
+    }
+
+    .sub-title-text {
+      color: #cbd5e1 !important;
+      font-size: 0.875rem;
+    }
+
+    .btn-att {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-att-h { color: var(--success-color); border-color: rgba(16, 185, 129, 0.3); }
+    .btn-att-h.active { background: var(--success-color); color: #fff; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); }
+
+    .btn-att-i { color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.3); }
+    .btn-att-i.active { background: var(--accent-cyan); color: #fff; box-shadow: 0 0 12px var(--accent-cyan-glow); }
+
+    .btn-att-s { color: var(--warning-color); border-color: rgba(245, 158, 11, 0.3); }
+    .btn-att-s.active { background: var(--warning-color); color: #fff; box-shadow: 0 0 12px rgba(245, 158, 11, 0.5); }
+
+    .btn-att-a { color: var(--danger-color); border-color: rgba(244, 63, 94, 0.3); }
+    .btn-att-a.active { background: var(--danger-color); color: #fff; box-shadow: 0 0 12px rgba(244, 63, 94, 0.5); }
+
+    .table-matrix th, .table-matrix td {
+      padding: 0.45rem 0.35rem;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+    .table-matrix .col-student {
+      text-align: left;
+      min-width: 180px;
+      position: sticky;
+      left: 0;
+      background: #0f172a;
+      z-index: 5;
+    }
+
+    .table {
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+    .table-dark-custom {
+      --bs-table-bg: transparent;
+      --bs-table-border-color: var(--border-color);
+    }
+    .table-dark-custom th {
+      color: var(--accent-cyan);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      padding: 1rem;
+    }
+
+    /* High Contrast Class Badge Fix */
+    .class-badge-pill {
+      background: rgba(6, 182, 212, 0.2) !important;
+      color: #22d3ee !important;
+      border: 1px solid rgba(6, 182, 212, 0.4) !important;
+      font-weight: 700 !important;
+      padding: 0.35rem 0.85rem !important;
+      border-radius: 20px !important;
+      display: inline-block !important;
+    }
+
+    /* High Contrast Status Badges */
+    .badge-live-status {
+      background: rgba(16, 185, 129, 0.2) !important;
+      color: #34d399 !important;
+      border: 1px solid rgba(16, 185, 129, 0.4) !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-demo-status {
+      background: rgba(245, 158, 11, 0.2) !important;
+      color: #fbbf24 !important;
+      border: 1px solid rgba(245, 158, 11, 0.4) !important;
+      font-weight: 700 !important;
+    }
+
+    /* Notification Bell Badge */
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      font-size: 0.65rem;
+      padding: 0.25em 0.5em;
+      border-radius: 50%;
+    }
+
+    /* Floating Bottom Progress Indicator */
+    .progress-bottom-bar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: 20px;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 1rem;
+      padding: 0.9rem 1.25rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-cyan-glow);
+      z-index: 9999;
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent-cyan));
+      border-radius: 10px;
+      transition: width 0.2s ease-out;
+      box-shadow: 0 0 10px var(--accent-cyan-glow);
+    }
+
+    @media (max-width: 991.98px) {
+      .app-sidebar {
+        transform: translateX(-100%);
+      }
+      .app-sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .app-main {
+        margin-left: 0 !important;
+      }
+      .progress-bottom-bar {
+        left: 15px; right: 15px; bottom: 15px;
+      }
+    }
+
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; }
+      .app-sidebar, .app-header, .no-print { display: none !important; }
+      .app-main { margin-left: 0 !important; }
+      .card { background: #ffffff !important; border: 1px solid #000 !important; color: #000 !important; box-shadow: none !important; }
+      .text-muted, .sub-title-text { color: #555555 !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Public Report View Mode for Parents -->
+  <div v-if="isPublicView" class="container py-4">
+    <div class="card p-4 text-light bg-dark">
+      <div class="text-center mb-4 pb-3 border-bottom border-secondary">
+        <h3 class="fw-extrabold mb-1 text-info">{{ publicReportData.schoolName || 'Laporan Transparan School' }}</h3>
+        <h5 class="fw-bold text-light mb-1">LAPORAN MANAJEMEN KELAS & PRESENSI SISWA</h5>
+        <p class="text-muted mb-0">Kelas: <strong class="text-light">{{ publicReportData.className }}</strong> • {{ publicReportData.monthName ? 'Bulan: ' + publicReportData.monthName : 'Semester Berjalan' }}</p>
+      </div>
+
+      <div v-if="publicReportLoading" class="text-center py-5">
+        <div class="spinner-border text-info" role="status"></div>
+        <p class="text-muted small mt-2">Memuat Laporan Presensi...</p>
+      </div>
+
+      <div v-else>
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered table-dark-custom align-middle">
+            <thead>
+              <tr class="text-center">
+                <th style="width: 50px;">NO</th>
+                <th>NISN</th>
+                <th class="text-start">NAMA SISWA</th>
+                <th>HADIR</th>
+                <th>IZIN</th>
+                <th>SAKIT</th>
+                <th>ALFA</th>
+                <th>% HADIR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(s, idx) in publicReportData.students" :key="s.id" class="text-center">
+                <td><strong class="text-info">{{ idx + 1 }}</strong></td>
+                <td><span class="badge bg-secondary bg-opacity-30 text-light border border-secondary">{{ s.nisn || '-' }}</span></td>
+                <td class="text-start fw-semibold text-light">{{ s.name }}</td>
+                <td class="text-success fw-bold">{{ getPublicStudentStats(s.id).H }}</td>
+                <td class="text-info fw-bold">{{ getPublicStudentStats(s.id).I }}</td>
+                <td class="text-warning fw-bold">{{ getPublicStudentStats(s.id).S }}</td>
+                <td class="text-danger fw-bold">{{ getPublicStudentStats(s.id).A }}</td>
+                <td class="fw-extrabold text-info">{{ calculatePublicStudentPercent(s.id) }}%</td>
+              </tr>
+              <tr v-if="publicReportData.students.length === 0">
+                <td colspan="8" class="text-center py-4 text-muted">Belum ada data presensi.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-end mt-5 pt-3">
+          <div></div>
+          <div class="text-center" style="min-width: 240px;">
+            <p class="mb-5 text-muted small">Wali Kelas / Guru Mata Pelajaran,</p>
+            <strong class="d-block text-light text-decoration-underline">{{ publicReportData.teacherName || 'Guru Pengampu' }}</strong>
+            <small class="text-muted">NIP. -</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-container" v-if="!isPublicView">
+    
+    <!-- Floating Bottom Progress Indicator -->
+    <div v-if="loading" class="progress-bottom-bar">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-info small"><i class="fa-solid fa-cloud-arrow-down me-1"></i> Synchronizing Google Sheets</span>
+        <span class="fw-extrabold text-light fs-6">{{ loadingProgress }}%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" :style="{ width: loadingProgress + '%' }"></div>
+      </div>
+      <p class="text-muted small mb-0 mt-1" style="font-size: 0.75rem;">{{ loadingText }}</p>
+    </div>
+
+    <!-- App Sidebar Navigation -->
+    <aside class="app-sidebar" :class="{ 'collapsed': sidebarCollapsed, 'mobile-open': mobileMenuOpen }" v-if="currentUser">
+      <a href="#" class="sidebar-brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-graduation-cap fa-lg"></i>
+        </div>
+        <span>MyClassHub</span>
+      </a>
+      
+      <ul class="sidebar-menu">
+        <li class="menu-item" :class="{ active: currentTab === 'dashboard' }">
+          <a class="menu-link" @click="currentTab = 'dashboard'" title="Dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="menu-item" :class="{ active: currentTab === 'classes' }">
+          <a class="menu-link" @click="currentTab = 'classes'" title="Kelas & Mapel">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Kelas & Mapel</span>
+          </a>
+        </li>
+        <li class="menu-item" :class="{ active: currentTab === 'students' }">
+          <a class="menu-link" @click="currentTab = 'students'" title="Data Siswa">
+            <i class="fa-solid fa-users"></i>
+            <span>Data Siswa</span>
+          </a>
+        </li>
+        <li class="menu-item" :class="{ active: currentTab === 'attendance' }">
+          <a class="menu-link" @click="currentTab = 'attendance'" title="Presensi Harian">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Presensi Harian</span>
+          </a>
+        </li>
+        <li class="menu-item" :class="{ active: currentTab === 'grades' }">
+          <a class="menu-link" @click="currentTab = 'grades'" title="Penilaian Akademik">
+            <i class="fa-solid fa-award"></i>
+            <span>Penilaian Akademik</span>
+          </a>
+        </li>
+        <li class="menu-item" :class="{ active: currentTab === 'journal' }">
+          <a class="menu-link" @click="currentTab = 'journal'" title="Jurnal Mengajar">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>Jurnal Mengajar</span>
+          </a>
+        </li>
+        <li class="menu-item" :class="{ active: currentTab === 'report' }">
+          <a class="menu-link" @click="currentTab = 'report'; loadReportTab();" title="Laporan Transparan">
+            <i class="fa-solid fa-file-invoice"></i>
+            <span>Laporan Transparan</span>
+          </a>
+        </li>
+        <li class="menu-item mt-3" :class="{ active: currentTab === 'settings' }">
+          <a class="menu-link text-warning" @click="currentTab = 'settings'" title="Pengaturan API">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Pengaturan API</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="p-3 border-top border-secondary">
+        <button class="btn btn-outline-danger w-100 btn-sm d-flex align-items-center justify-content-center gap-2" @click="logout" title="Keluar">
+          <i class="fa-solid fa-power-off"></i>
+          <span class="btn-hide-text">Keluar</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-main" :class="{ 'expanded': sidebarCollapsed, 'auth-mode': !currentUser }">
+      <!-- Navbar Header -->
+      <header class="app-header" v-if="currentUser">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-cyber btn-sm" @click="toggleSidebar" title="Sembunyikan / Buka Sidebar">
+            <i class="fa-solid" :class="sidebarCollapsed ? 'fa-indent' : 'fa-bars'"></i>
+          </button>
+          
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-school text-info"></i>
+            <select class="form-select form-select-sm fw-bold border-0" v-model="selectedClassId" style="width: auto;" @change="onClassChange">
+              <option value="" disabled>-- Pilih Kelas Active --</option>
+              <option v-for="c in classes" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+
+          <!-- Explicit Sync Data Button -->
+          <button class="btn btn-outline-cyber btn-sm d-flex align-items-center gap-1 ms-2" @click="syncAllData" title="Sinkronkan & Refresh Data Google Sheets">
+            <i class="fa-solid fa-rotate" :class="{ 'fa-spin': loading }"></i>
+            <span class="d-none d-md-inline">Sync Data</span>
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <div class="dropdown position-relative">
+            <button class="btn btn-outline-cyber btn-sm position-relative" type="button" @click="isNotifOpen = !isNotifOpen">
+              <i class="fa-solid fa-bell"></i>
+              <span v-if="unreadNotificationsCount > 0" class="badge bg-danger notif-badge">
+                {{ unreadNotificationsCount }}
+              </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg p-0" :class="{ 'show': isNotifOpen }" style="width: 310px; max-height: 380px; overflow-y: auto; position: absolute; right: 0; top: 100%; margin-top: 0.5rem;">
+              <li class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-light small"><i class="fa-solid fa-bell text-info me-1"></i> Pemberitahuan System</span>
+                <span class="badge bg-primary rounded-pill">{{ unreadNotificationsCount }} Baru</span>
+              </li>
+              <li v-for="notif in notifications" :key="notif.id" class="border-bottom border-secondary">
+                <a class="dropdown-item py-2 px-3 text-wrap" href="#" @click.prevent="handleNotificationClick(notif)">
+                  <div class="d-flex justify-content-between">
+                    <strong class="small text-info">{{ notif.title }}</strong>
+                    <small class="text-muted" style="font-size: 0.7rem;">{{ notif.time }}</small>
+                  </div>
+                  <p class="mb-0 small text-light text-opacity-75" style="font-size: 0.8rem;">{{ notif.message }}</p>
+                </a>
+              </li>
+              <li v-if="notifications.length === 0" class="p-3 text-center text-muted small">
+                Tidak ada pemberitahuan baru.
+              </li>
+            </ul>
+          </div>
+
+          <span v-if="isDemoMode" class="badge badge-demo-status px-3 py-2 rounded-pill">
+            <i class="fa-solid fa-bolt me-1"></i> Mode Demo
+          </span>
+          <span v-else class="badge badge-live-status px-3 py-2 rounded-pill">
+            <i class="fa-solid fa-circle-check me-1"></i> Google Sheets Live
+          </span>
+
+          <div class="dropdown">
+            <button class="btn btn-outline-cyber btn-sm rounded-circle p-2" type="button" id="userMenu" data-bs-toggle="dropdown">
+              <i class="fa-solid fa-user-astronaut fa-lg text-info"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg" aria-labelledby="userMenu">
+              <li class="px-3 py-2 border-bottom border-secondary">
+                <div class="fw-bold text-light">{{ currentUser.nama_lengkap }}</div>
+                <small class="text-muted">{{ currentUser.nama_madrasah }}</small>
+              </li>
+              <li><a class="dropdown-item" href="#" @click="currentTab = 'settings'"><i class="fa-solid fa-gear me-2"></i> Pengaturan API</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" @click="logout"><i class="fa-solid fa-power-off me-2"></i> Keluar</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+
+        <!-- Auth Page -->
+        <div v-if="!currentUser" class="container py-5">
+          <div class="row justify-content-center">
+            <div class="col-md-5">
+              <div class="card p-4 p-md-5 shadow-lg">
+                <div class="text-center mb-4">
+                  <div class="brand-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem;">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                  </div>
+                  <h3 class="fw-bold text-light">MyClassHub</h3>
+                  <p class="text-muted small">Futuristic Class & Administration Management System</p>
+                </div>
+
+                <ul class="nav nav-pills nav-justified mb-4 p-1 bg-dark bg-opacity-50 rounded-3 border border-secondary" id="pills-tab">
+                  <li class="nav-item">
+                    <button class="nav-link text-light" :class="{ 'active btn-cyber': authTab === 'login' }" @click="authTab = 'login'">Masuk</button>
+                  </li>
+                  <li class="nav-item">
+                    <button class="nav-link text-light" :class="{ 'active btn-cyber': authTab === 'register' }" @click="authTab = 'register'">Daftar</button>
+                  </li>
+                </ul>
+
+                <form v-if="authTab === 'login'" @submit.prevent="login">
+                  <div class="mb-3">
+                    <label class="form-label text-muted small">Username</label>
+                    <input type="text" class="form-control" v-model="loginForm.username" required placeholder="guruman1">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label text-muted small">Password</label>
+                    <input type="password" class="form-control" v-model="loginForm.password" required placeholder="••••••••">
+                  </div>
+                  <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
+                    Masuk System
+                  </button>
+                </form>
+
+                <form v-if="authTab === 'register'" @submit.prevent="register">
+                  <div class="mb-3">
+                    <label class="form-label text-muted small">Nama Lengkap Guru</label>
+                    <input type="text" class="form-control" v-model="regForm.nama_lengkap" required placeholder="Budi Santoso, S.Pd.">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label text-muted small">Nama Sekolah / Madrasah</label>
+                    <input type="text" class="form-control" v-model="regForm.nama_madrasah" required placeholder="MAN 2 Seram Bagian Timur">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label text-muted small">Username Baru</label>
+                    <input type="text" class="form-control" v-model="regForm.username" required placeholder="username">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label text-muted small">Password</label>
+                    <input type="password" class="form-control" v-model="regForm.password" required placeholder="••••••••">
+                  </div>
+                  <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
+                    Daftar Akun Baru
+                  </button>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top border-secondary">
+                  <button class="btn btn-outline-cyber btn-sm w-100" @click="startDemoMode">
+                    <i class="fa-solid fa-rocket me-1"></i> Mode Demo Instan (Tanpa Setup API)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. DASHBOARD -->
+        <div v-if="currentUser && currentTab === 'dashboard'">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+              <h3 class="fw-bold mb-1 text-light">Selamat Datang, {{ currentUser.nama_lengkap }}! 🚀</h3>
+              <p class="sub-title-text mb-0">{{ currentUser.nama_madrasah }} • Ringkasan Mengajar System</p>
+            </div>
+            <button class="btn btn-cyber px-4" @click="currentTab = 'attendance'">
+              <i class="fa-solid fa-plus me-2"></i> Input Presensi
+            </button>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card p-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="p-3 rounded-3 bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30"><i class="fa-solid fa-users fa-xl"></i></div>
+                  <div>
+                    <h2 class="fw-bold mb-0 text-light">{{ selectedClassStudents.length }}</h2>
+                    <small class="text-muted fw-medium">Total Siswa ({{ currentClassName }})</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="p-3 rounded-3 bg-success bg-opacity-20 text-success border border-success border-opacity-30"><i class="fa-solid fa-user-check fa-xl"></i></div>
+                  <div>
+                    <h2 class="fw-bold mb-0 text-light">{{ attendancePercentage }}%</h2>
+                    <small class="text-muted fw-medium">Rata-Rata Kehadiran</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="p-3 rounded-3 bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30"><i class="fa-solid fa-book-open fa-xl"></i></div>
+                  <div>
+                    <h2 class="fw-bold mb-0 text-light">{{ journals.length }}</h2>
+                    <small class="text-muted fw-medium">Total Jurnal Mengajar</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card p-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="p-3 rounded-3 bg-info bg-opacity-20 text-info border border-info border-opacity-30"><i class="fa-solid fa-chalkboard fa-xl"></i></div>
+                  <div>
+                    <h2 class="fw-bold mb-0 text-light">{{ classes.length }}</h2>
+                    <small class="text-muted fw-medium">Total Kelas Dikelola</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <h5 class="fw-bold mb-0 text-light"><i class="fa-solid fa-clock-rotate-left me-2 text-info"></i>Jurnal Mengajar Terakhir</h5>
+              <button class="btn btn-sm btn-outline-cyber" @click="currentTab = 'journal'">Lihat Semua</button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-dark-custom align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Tanggal</th>
+                      <th>Mata Pelajaran</th>
+                      <th>Topik Bahasan</th>
+                      <th>Aktivitas KBM</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="j in journals.slice(0, 5)" :key="j.id">
+                      <td><span class="badge bg-secondary bg-opacity-30 text-info border border-info border-opacity-20">{{ j.date }}</span></td>
+                      <td class="fw-semibold text-light">{{ getSubjectName(j.subject_id) }}</td>
+                      <td class="text-light">{{ j.topic }}</td>
+                      <td><small class="text-muted">{{ j.activities }}</small></td>
+                    </tr>
+                    <tr v-if="journals.length === 0">
+                      <td colspan="4" class="text-center py-4 text-muted">Belum ada catatan jurnal mengajar.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. KELAS & MAPEL -->
+        <div v-if="currentUser && currentTab === 'classes'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold text-light mb-0"><i class="fa-solid fa-layer-group text-info me-2"></i>Kelola Kelas & Mata Pelajaran</h4>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="fw-bold text-light mb-0">Daftar Kelas (Rombel)</h5>
+                </div>
+                <div class="card-body">
+                  <form @submit.prevent="addClass" class="d-flex gap-2 mb-3">
+                    <input type="text" class="form-control" v-model="newClassName" placeholder="Nama Kelas Baru (Contoh: X.C)" required>
+                    <button type="submit" class="btn btn-cyber text-nowrap"><i class="fa-solid fa-plus me-1"></i> Tambah</button>
+                  </form>
+                  <div class="table-responsive">
+                    <table class="table table-dark-custom align-middle">
+                      <thead>
+                        <tr>
+                          <th>NAMA KELAS</th>
+                          <th class="text-end">AKSI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="c in classes" :key="c.id">
+                          <td class="fw-bold text-light">{{ c.name }}</td>
+                          <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger" @click="deleteClass(c.id)"><i class="fa-solid fa-trash"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="fw-bold text-light mb-0">Daftar Mata Pelajaran</h5>
+                </div>
+                <div class="card-body">
+                  <form @submit.prevent="addSubject" class="d-flex gap-2 mb-3">
+                    <input type="text" class="form-control" v-model="newSubjectName" placeholder="Nama Mapel Baru (Contoh: Bahasa Inggris)" required>
+                    <button type="submit" class="btn btn-cyber text-nowrap"><i class="fa-solid fa-plus me-1"></i> Tambah</button>
+                  </form>
+                  <div class="table-responsive">
+                    <table class="table table-dark-custom align-middle">
+                      <thead>
+                        <tr>
+                          <th>NAMA MATA PELAJARAN</th>
+                          <th class="text-end">AKSI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="sub in subjects" :key="sub.id">
+                          <td class="fw-bold text-light">{{ sub.name }}</td>
+                          <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger" @click="deleteSubject(sub.id)"><i class="fa-solid fa-trash"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. DATA SISWA -->
+        <div v-if="currentUser && currentTab === 'students'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-users text-info me-2"></i>Data Siswa Kelas {{ currentClassName }}</h4>
+              <p class="text-muted small mb-0">Kelola master data siswa, import/export Excel secara praktis.</p>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-info btn-sm" @click="downloadStudentTemplate"><i class="fa-solid fa-file-excel me-1"></i> Template Excel</button>
+              <label class="btn btn-outline-success btn-sm mb-0 cursor-pointer">
+                <i class="fa-solid fa-file-import me-1"></i> Import Excel
+                <input type="file" accept=".xlsx, .xls" class="d-none" @change="importStudentsExcel">
+              </label>
+              <button class="btn btn-cyber btn-sm" @click="openStudentModal()"><i class="fa-solid fa-user-plus me-1"></i> Tambah Siswa</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-dark-custom align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width: 60px;">NO</th>
+                      <th>NISN</th>
+                      <th>NAMA SISWA</th>
+                      <th>KELAS</th>
+                      <th class="text-end">AKSI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
+                      <td><span class="fw-bold text-info">{{ idx + 1 }}</span></td>
+                      <td><span class="badge bg-secondary bg-opacity-30 text-light border border-secondary">{{ s.nisn || '-' }}</span></td>
+                      <td class="fw-semibold text-light">{{ s.name }}</td>
+                      <td>
+                        <span class="class-badge-pill">
+                          {{ getClassName(s.class_id) }}
+                        </span>
+                      </td>
+                      <td class="text-end">
+                        <button class="btn btn-sm btn-outline-cyber me-1" @click="openStudentModal(s)"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" @click="deleteStudent(s.id)"><i class="fa-solid fa-trash"></i></button>
+                      </td>
+                    </tr>
+                    <tr v-if="selectedClassStudents.length === 0">
+                      <td colspan="5" class="text-center py-4 text-muted">Belum ada data siswa di kelas ini.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. PRESENSI HARIAN -->
+        <div v-if="currentUser && currentTab === 'attendance'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold text-light mb-0">Presensi Siswa: {{ currentClassName }}</h4>
+            <div class="btn-group p-1 bg-dark bg-opacity-60 rounded-3 border border-secondary">
+              <button class="btn btn-sm px-3" :class="attMode === 'daily' ? 'btn-cyber' : 'btn-outline-cyber'" @click="attMode = 'daily'">
+                <i class="fa-solid fa-pen-to-square me-1"></i> Input Presensi Harian
+              </button>
+              <button class="btn btn-sm px-3" :class="attMode === 'recap' ? 'btn-cyber' : 'btn-outline-cyber'" @click="attMode = 'recap'; loadMonthlyRecapData();">
+                <i class="fa-solid fa-table-cells me-1"></i> Rekapitulasi Bulanan
+              </button>
+            </div>
+          </div>
+
+          <!-- Daily Mode -->
+          <div v-if="attMode === 'daily'">
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Tanggal Presensi</label>
+                    <input type="date" class="form-control" v-model="attendanceDate" @change="loadAttendanceData">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted small fw-bold">Mata Pelajaran</label>
+                    <select class="form-select" v-model="selectedSubjectId" @change="loadAttendanceData">
+                      <option value="" disabled>-- Pilih Mapel --</option>
+                      <option v-for="sub in subjects" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5 d-flex align-items-end gap-2">
+                    <button class="btn btn-outline-cyber" @click="markAllPresent">
+                      <i class="fa-solid fa-check-double me-1"></i> Tandai Semua Hadir
+                    </button>
+                    <button class="btn btn-cyber ms-auto" @click="saveAttendance">
+                      <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Presensi
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col">
+                <div class="card p-2 text-center bg-dark bg-opacity-40 border-secondary">
+                  <small class="text-muted d-block">Total Siswa</small>
+                  <span class="fs-5 fw-bold text-light">{{ liveAttStats.total }}</span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card p-2 text-center bg-success bg-opacity-10 border-success border-opacity-30">
+                  <small class="text-success fw-bold d-block">Hadir (H)</small>
+                  <span class="fs-5 fw-bold text-success">{{ liveAttStats.H }}</span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card p-2 text-center bg-info bg-opacity-10 border-info border-opacity-30">
+                  <small class="text-info fw-bold d-block">Izin (I)</small>
+                  <span class="fs-5 fw-bold text-info">{{ liveAttStats.I }}</span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card p-2 text-center bg-warning bg-opacity-10 border-warning border-opacity-30">
+                  <small class="text-warning fw-bold d-block">Sakit (S)</small>
+                  <span class="fs-5 fw-bold text-warning">{{ liveAttStats.S }}</span>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card p-2 text-center bg-danger bg-opacity-10 border-danger border-opacity-30">
+                  <small class="text-danger fw-bold d-block">Alfa (A)</small>
+                  <span class="fs-5 fw-bold text-danger">{{ liveAttStats.A }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h5 class="fw-bold mb-0 text-light">Presensi Siswa: {{ currentClassName }} ({{ attendanceDate }})</h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-dark-custom align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 70px;">NO</th>
+                        <th>NAMA SISWA</th>
+                        <th class="text-center">STATUS KEHADIRAN (H / I / S / A)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
+                        <td><span class="fw-bold text-info fs-6">{{ idx + 1 }}</span></td>
+                        <td class="fw-semibold text-light">{{ s.name }}</td>
+                        <td class="text-center">
+                          <div class="d-inline-flex gap-2">
+                            <button type="button" class="btn-att btn-att-h" :class="{ active: currentAttendance[s.id] === 'H' }" @click="setAttendanceStatus(s.id, 'H')">H</button>
+                            <button type="button" class="btn-att btn-att-i" :class="{ active: currentAttendance[s.id] === 'I' }" @click="setAttendanceStatus(s.id, 'I')">I</button>
+                            <button type="button" class="btn-att btn-att-s" :class="{ active: currentAttendance[s.id] === 'S' }" @click="setAttendanceStatus(s.id, 'S')">S</button>
+                            <button type="button" class="btn-att btn-att-a" :class="{ active: currentAttendance[s.id] === 'A' }" @click="setAttendanceStatus(s.id, 'A')">A</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recap Mode -->
+          <div v-if="attMode === 'recap'">
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Pilih Bulan</label>
+                    <select class="form-select" v-model="recapMonthNum" @change="loadMonthlyRecapData">
+                      <option v-for="m in monthsList" :key="m.val" :value="m.val">{{ m.name }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label text-muted small fw-bold">Tahun</label>
+                    <select class="form-select" v-model="recapYear" @change="loadMonthlyRecapData">
+                      <option v-for="y in yearsList" :key="y" :value="y">{{ y }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Mata Pelajaran</label>
+                    <select class="form-select" v-model="selectedSubjectId" @change="loadMonthlyRecapData">
+                      <option value="" disabled>-- Pilih Mapel --</option>
+                      <option v-for="sub in subjects" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 d-flex justify-content-end">
+                    <button class="btn btn-outline-success" @click="exportMonthlyAttExcel">
+                      <i class="fa-solid fa-file-excel me-1"></i> Export Rekap Bulanan Excel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h5 class="fw-bold mb-0 text-light">Matriks Presensi Bulanan: {{ currentClassName }} ({{ getMonthName(recapMonthNum) }} {{ recapYear }})</h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-dark-custom table-bordered table-matrix align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 40px;">No</th>
+                        <th class="col-student">Nama Siswa</th>
+                        <th v-for="day in daysInSelectedMonth" :key="day" style="min-width: 28px;">{{ day }}</th>
+                        <th style="min-width: 35px;" class="text-success">H</th>
+                        <th style="min-width: 35px;" class="text-info">I</th>
+                        <th style="min-width: 35px;" class="text-warning">S</th>
+                        <th style="min-width: 35px;" class="text-danger">A</th>
+                        <th style="min-width: 50px;">%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
+                        <td><span class="fw-bold text-info">{{ idx + 1 }}</span></td>
+                        <td class="col-student fw-semibold text-light text-start">{{ s.name }}</td>
+                        
+                        <td v-for="day in daysInSelectedMonth" :key="day">
+                          <span v-if="getStudentDayStatus(s.id, day) === 'H'" class="text-success fw-bold">H</span>
+                          <span v-else-if="getStudentDayStatus(s.id, day) === 'I'" class="text-info fw-bold">I</span>
+                          <span v-else-if="getStudentDayStatus(s.id, day) === 'S'" class="text-warning fw-bold">S</span>
+                          <span v-else-if="getStudentDayStatus(s.id, day) === 'A'" class="text-danger fw-bold">A</span>
+                          <span v-else class="text-dim">-</span>
+                        </td>
+
+                        <td class="fw-bold text-success">{{ getStudentRecapTotals(s.id).H }}</td>
+                        <td class="fw-bold text-info">{{ getStudentRecapTotals(s.id).I }}</td>
+                        <td class="fw-bold text-warning">{{ getStudentRecapTotals(s.id).S }}</td>
+                        <td class="fw-bold text-danger">{{ getStudentRecapTotals(s.id).A }}</td>
+                        <td class="fw-bold text-light">{{ getStudentRecapTotals(s.id).percent }}%</td>
+                      </tr>
+                      <tr v-if="selectedClassStudents.length === 0">
+                        <td :colspan="daysInSelectedMonth + 7" class="text-center py-4 text-muted">Belum ada siswa di kelas ini.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. PENILAIAN AKADEMIK -->
+        <div v-if="currentUser && currentTab === 'grades'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-award text-info me-2"></i>Penilaian Akademik Siswa: {{ currentClassName }}</h4>
+              <p class="text-muted small mb-0">Input nilai Ulangan Harian, UTS, dan UAS.</p>
+            </div>
+            <button class="btn btn-cyber" @click="saveGradesBulk"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Nilai</button>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-bold">Mata Pelajaran</label>
+                  <select class="form-select" v-model="selectedSubjectId" @change="loadGradesData">
+                    <option value="" disabled>-- Pilih Mapel --</option>
+                    <option v-for="sub in subjects" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-dark-custom align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">NO</th>
+                      <th>NAMA SISWA</th>
+                      <th style="width: 120px;">UH1</th>
+                      <th style="width: 120px;">UH2</th>
+                      <th style="width: 120px;">UTS</th>
+                      <th style="width: 120px;">UAS</th>
+                      <th style="width: 120px;">RATA-RATA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
+                      <td><span class="fw-bold text-info">{{ idx + 1 }}</span></td>
+                      <td class="fw-semibold text-light">{{ s.name }}</td>
+                      <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UH1']"></td>
+                      <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UH2']"></td>
+                      <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UTS']"></td>
+                      <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UAS']"></td>
+                      <td class="fw-bold text-info text-center">{{ calculateStudentGradeAverage(s.id) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. JURNAL MENGAJAR -->
+        <div v-if="currentUser && currentTab === 'journal'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold text-light mb-0"><i class="fa-solid fa-book-open-reader text-info me-2"></i>Jurnal Mengajar KBM</h4>
+            <button class="btn btn-cyber" @click="resetJournalForm"><i class="fa-solid fa-plus me-1"></i> Form Jurnal Baru</button>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-body">
+              <form @submit.prevent="saveJournal">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Tanggal KBM</label>
+                    <input type="date" class="form-control" v-model="journalForm.date" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted small fw-bold">Mata Pelajaran</label>
+                    <select class="form-select" v-model="journalForm.subject_id" required>
+                      <option value="" disabled>-- Pilih Mapel --</option>
+                      <option v-for="sub in subjects" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label text-muted small fw-bold">Materi / Topik Bahasan</label>
+                    <input type="text" class="form-control" v-model="journalForm.topic" placeholder="Contoh: Narrative Text - Legend" required>
+                  </div>
+                  <div class="col-md-12">
+                    <label class="form-label text-muted small fw-bold">Aktivitas & Catatan KBM</label>
+                    <textarea class="form-control" rows="2" v-model="journalForm.activities" placeholder="Catatan jalannya pembelajaran, kendala, atau penugasan..." required></textarea>
+                  </div>
+                  <div class="col-md-12 text-end">
+                    <button type="submit" class="btn btn-cyber px-4"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Jurnal</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h5 class="fw-bold text-light mb-0">Riwayat Jurnal Mengajar Kelas {{ currentClassName }}</h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-dark-custom align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>TANGGAL</th>
+                      <th>MAPEL</th>
+                      <th>TOPIK / MATERI</th>
+                      <th>AKTIVITAS KBM</th>
+                      <th class="text-end">AKSI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="j in journals" :key="j.id">
+                      <td><span class="badge bg-secondary bg-opacity-30 text-info border border-info border-opacity-20">{{ j.date }}</span></td>
+                      <td class="fw-semibold text-light">{{ getSubjectName(j.subject_id) }}</td>
+                      <td class="text-light">{{ j.topic }}</td>
+                      <td><small class="text-muted">{{ j.activities }}</small></td>
+                      <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger" @click="deleteJournal(j.id)"><i class="fa-solid fa-trash"></i></button>
+                      </td>
+                    </tr>
+                    <tr v-if="journals.length === 0">
+                      <td colspan="5" class="text-center py-4 text-muted">Belum ada data jurnal mengajar.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. LAPORAN TRANSPARAN WALI MURID -->
+        <div v-if="currentUser && currentTab === 'report'">
+          <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <div>
+              <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-file-invoice text-info me-2"></i>Laporan Transparan Wali Murid</h4>
+              <p class="text-muted small mb-0">Cetak dokumen PDF dan bagikan link laporan presensi kelas {{ currentClassName }}</p>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-info" @click="copyPublicLink" title="Salin Link Publik Wali Murid">
+                <i class="fa-solid fa-share-nodes me-1"></i> Salin Link Laporan Publik
+              </button>
+              <button class="btn btn-cyber" @click="printReport">
+                <i class="fa-solid fa-print me-1"></i> Cetak Dokumen PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Month & Year Filter Options -->
+          <div class="card mb-4 no-print">
+            <div class="card-body">
+              <div class="row g-3 align-items-center">
+                <div class="col-md-3">
+                  <label class="form-label text-muted small fw-bold">Filter Bulan</label>
+                  <select class="form-select" v-model="reportMonthNum" @change="loadReportTab">
+                    <option value="ALL">-- Semua Bulan (Semester) --</option>
+                    <option v-for="m in monthsList" :key="m.val" :value="m.val">{{ m.name }}</option>
+                  </select>
+                </div>
+                <div class="col-md-2" v-if="reportMonthNum !== 'ALL'">
+                  <label class="form-label text-muted small fw-bold">Tahun</label>
+                  <select class="form-select" v-model="reportYear" @change="loadReportTab">
+                    <option v-for="y in yearsList" :key="y" :value="y">{{ y }}</option>
+                  </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end" v-if="reportMonthNum !== 'ALL'">
+                  <button class="btn btn-outline-cyber btn-sm" @click="reportMonthNum = 'ALL'; loadReportTab();">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reset Ke Semester
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-4 text-light">
+            <div class="text-center mb-4 pb-3 border-bottom border-secondary">
+              <h3 class="fw-extrabold mb-1 text-light">{{ currentUser.nama_madrasah }}</h3>
+              <h5 class="fw-bold text-info mb-1">LAPORAN REKAPITULASI PRESENSI SISWA</h5>
+              <p class="text-muted mb-0">Kelas: <strong class="text-light">{{ currentClassName }}</strong> • {{ reportMonthNum !== 'ALL' ? 'Bulan: ' + getMonthName(reportMonthNum) + ' ' + reportYear : 'Semester Berjalan' }}</p>
+            </div>
+
+            <div class="table-responsive mb-4">
+              <table class="table table-bordered table-dark-custom align-middle">
+                <thead>
+                  <tr class="text-center">
+                    <th style="width: 60px;">NO</th>
+                    <th style="width: 140px;">NISN</th>
+                    <th class="text-start">NAMA SISWA</th>
+                    <th style="width: 80px;">HADIR</th>
+                    <th style="width: 80px;">IZIN</th>
+                    <th style="width: 80px;">SAKIT</th>
+                    <th style="width: 80px;">ALFA</th>
+                    <th style="width: 100px;">% HADIR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(s, idx) in selectedClassStudents" :key="s.id" class="text-center">
+                    <td><strong class="text-info fs-6">{{ idx + 1 }}</strong></td>
+                    <td><span class="badge bg-secondary bg-opacity-40 text-light border border-secondary">{{ s.nisn || '-' }}</span></td>
+                    <td class="text-start fw-semibold text-light">{{ s.name }}</td>
+                    <td class="text-success fw-bold fs-6">{{ getStudentAttStatsReport(s.id).H }}</td>
+                    <td class="text-info fw-bold fs-6">{{ getStudentAttStatsReport(s.id).I }}</td>
+                    <td class="text-warning fw-bold fs-6">{{ getStudentAttStatsReport(s.id).S }}</td>
+                    <td class="text-danger fw-bold fs-6">{{ getStudentAttStatsReport(s.id).A }}</td>
+                    <td class="fw-extrabold text-info fs-6">{{ calculateStudentAttPercentReport(s.id) }}%</td>
+                  </tr>
+                  <tr v-if="selectedClassStudents.length === 0">
+                    <td colspan="8" class="text-center py-4 text-muted">Belum ada siswa terdaftar.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-end mt-5 pt-4">
+              <div></div>
+              <div class="text-center" style="min-width: 240px;">
+                <p class="mb-5 text-muted small">Wali Kelas / Guru Mata Pelajaran,</p>
+                <strong class="d-block text-light text-decoration-underline fs-6">{{ currentUser.nama_lengkap }}</strong>
+                <small class="text-muted">NIP. -</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. PENGATURAN API -->
+        <div v-if="currentUser && currentTab === 'settings'">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold text-light mb-0"><i class="fa-solid fa-sliders text-warning me-2"></i>Pengaturan API & Google Sheets Backend</h4>
+          </div>
+
+          <div class="card p-4">
+            <h5 class="fw-bold text-light mb-3">Konfigurasi URL Endpoint Web App</h5>
+            <p class="text-muted small mb-4">Pastikan URL Web App Google Apps Script terpasang secara tepat untuk menyinkronkan data secara otomatis.</p>
+
+            <form @submit.prevent="saveApiUrl">
+              <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">Google Apps Script Web App URL</label>
+                <input type="text" class="form-control form-control-lg font-monospace" v-model="apiUrl" required placeholder="https://script.google.com/macros/s/.../exec">
+              </div>
+
+              <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-cyber px-4">
+                  <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Konfigurasi
+                </button>
+                <button type="button" class="btn btn-outline-cyber" @click="testApiConnection">
+                  <i class="fa-solid fa-plug me-1"></i> Uji Koneksi API
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5.3 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyRK6bE_0KYWuhvniKuqdJSR-u4RsOZEth5lHPGVDeKAzJrphsHbK4nfxne2ZJLErtA2g/exec';
+  const { createApp, ref, computed, onMounted } = Vue;
+
+  createApp({
+    setup() {
+      // Core State Variables
+      const apiUrl = ref(localStorage.getItem('myclasshub_api_url') || DEFAULT_API_URL);
+      const isDemoMode = ref(localStorage.getItem('myclasshub_demo') === 'true');
+      const currentUser = ref(JSON.parse(localStorage.getItem('myclasshub_user') || 'null'));
+      const token = ref(localStorage.getItem('myclasshub_token') || '');
+      const currentTab = ref('dashboard');
+      const authTab = ref('login');
+      const sidebarCollapsed = ref(localStorage.getItem('myclasshub_sidebar_collapsed') === 'true');
+      const mobileMenuOpen = ref(false);
+      const loading = ref(false);
+      const loadingProgress = ref(0);
+      const loadingText = ref('Menghubungkan ke Google Sheets...');
+      const isNotifOpen = ref(false);
+
+      // Month List Options (Indonesian)
+      const monthsList = [
+        { val: '01', name: 'Januari' },
+        { val: '02', name: 'Februari' },
+        { val: '03', name: 'Maret' },
+        { val: '04', name: 'April' },
+        { val: '05', name: 'Mei' },
+        { val: '06', name: 'Juni' },
+        { val: '07', name: 'Juli' },
+        { val: '08', name: 'Agustus' },
+        { val: '09', name: 'September' },
+        { val: '10', name: 'Oktober' },
+        { val: '11', name: 'November' },
+        { val: '12', name: 'Desember' }
+      ];
+
+      const yearsList = ['2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+
+      const getMonthName = (mVal) => {
+        const found = monthsList.find(m => m.val === mVal);
+        return found ? found.name : mVal;
+      };
+
+      // Public Parent Mode State
+      const isPublicView = ref(false);
+      const publicReportLoading = ref(false);
+      const publicReportData = ref({
+        schoolName: '',
+        className: '',
+        teacherName: '',
+        monthName: '',
+        students: [],
+        attendances: []
+      });
+
+      // Filter State for Recap & Parent Report
+      const currentYearStr = new Date().getFullYear().toString();
+      const currentMonthStr = String(new Date().getMonth() + 1).padStart(2, '0');
+
+      const recapMonthNum = ref(currentMonthStr);
+      const recapYear = ref(yearsList.includes(currentYearStr) ? currentYearStr : '2026');
+
+      const reportMonthNum = ref(currentMonthStr);
+      const reportYear = ref(yearsList.includes(currentYearStr) ? currentYearStr : '2026');
+
+      const recapMonth = computed(() => `${recapYear.value}-${recapMonthNum.value}`);
+
+      // Notification State
+      const notifications = ref([
+        { id: 1, title: 'Presensi Harian', message: 'Ingat untuk mengisi presensi kelas hari ini.', read: false, targetTab: 'attendance', time: 'Baru saja' },
+        { id: 2, title: 'Jurnal Mengajar', message: 'Lengkapi jurnal kegiatan KBM pembelajaran.', read: false, targetTab: 'journal', time: '1 jam lalu' },
+        { id: 3, title: 'Google Sheets Live', message: 'Backend API tersambung dengan sukses.', read: false, targetTab: 'settings', time: 'Hari ini' }
+      ]);
+
+      const unreadNotificationsCount = computed(() => {
+        return notifications.value.filter(n => !n.read).length;
+      });
+
+      const handleNotificationClick = (notif) => {
+        notif.read = true;
+        isNotifOpen.value = false;
+        if (notif.targetTab) {
+          currentTab.value = notif.targetTab;
+        }
+      };
+
+      // Form Models
+      const loginForm = ref({ username: '', password: '' });
+      const regForm = ref({ username: '', password: '', nama_lengkap: '', nama_madrasah: '' });
+      const newClassName = ref('');
+      const newSubjectName = ref('');
+      const attendanceDate = ref(new Date().toISOString().split('T')[0]);
+      const currentAttendance = ref({});
+      const currentGrades = ref({});
+      const attMode = ref('daily');
+
+      // Data Collections
+      const classes = ref([]);
+      const selectedClassId = ref('');
+      const subjects = ref([]);
+      const selectedSubjectId = ref('');
+      const students = ref([]);
+      const attendances = ref([]);
+      const grades = ref([]);
+      const journals = ref([]);
+
+      const journalForm = ref({
+        id: null,
+        date: new Date().toISOString().split('T')[0],
+        subject_id: '',
+        topic: '',
+        activities: ''
+      });
+
+      const normalizeDate = (dStr) => {
+        if (!dStr) return '';
+        const s = String(dStr).trim();
+        if (s.includes('T')) return s.split('T')[0];
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+        return s;
+      };
+
+      const startProgressAnimation = () => {
+        loading.value = true;
+        loadingProgress.value = 10;
+        loadingText.value = 'Menghubungkan ke Google Sheets...';
+        
+        const interval = setInterval(() => {
+          if (loadingProgress.value < 90) {
+            loadingProgress.value += Math.floor(Math.random() * 12) + 5;
+            if (loadingProgress.value > 90) loadingProgress.value = 90;
+            
+            if (loadingProgress.value > 40) loadingText.value = 'Memproses data spreadsheet...';
+            if (loadingProgress.value > 75) loadingText.value = 'Menyiapkan respon...';
+          } else {
+            clearInterval(interval);
+          }
+        }, 120);
+
+        return interval;
+      };
+
+      const stopProgressAnimation = (interval) => {
+        clearInterval(interval);
+        loadingProgress.value = 100;
+        loadingText.value = 'Selesai!';
+        setTimeout(() => {
+          loading.value = false;
+          loadingProgress.value = 0;
+        }, 200);
+      };
+
+      const handleDemoRequest = (action, payload) => {
+        if (action === 'login' || action === 'register') {
+          const u = { id: 'demo_user', username: payload.username || 'demo', nama_lengkap: payload.nama_lengkap || 'Guru Demo, S.Pd.', nama_madrasah: payload.nama_madrasah || 'MAN Demo' };
+          return { token: 'demo_token_123', user: u };
+        }
+        if (action === 'getClasses') return [{ id: 'c1', name: 'X.C' }, { id: 'c2', name: 'XII IPA 1' }];
+        if (action === 'getSubjects') return [{ id: 's1', name: 'Bahasa Inggris' }, { id: 's2', name: 'Matematika Wajib' }];
+        if (action === 'getStudents') {
+          return [
+            { id: 'st1', class_id: 'c1', name: 'Aisa Kianlau', nisn: '005123001' },
+            { id: 'st2', class_id: 'c1', name: 'Anita Arey', nisn: '005123002' },
+            { id: 'st3', class_id: 'c1', name: 'Arham Rahakbawu', nisn: '005123003' },
+            { id: 'st4', class_id: 'c1', name: 'Ayatul Husna Kalean', nisn: '005123004' }
+          ];
+        }
+        if (action === 'createClass' || action === 'createSubject' || action === 'createStudent' || action === 'createJournal') {
+          return { id: 'demo_' + Date.now() };
+        }
+        return [];
+      };
+
+      const apiRequest = async (action, payload = {}) => {
+        if (isDemoMode.value) {
+          return handleDemoRequest(action, payload);
+        }
+
+        const timer = startProgressAnimation();
+
+        try {
+          const res = await fetch(apiUrl.value, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action, payload, token: token.value })
+          });
+          const json = await res.json();
+          if (!json.success) {
+            if (json.error && json.error.toLowerCase().includes('token tidak valid')) {
+              logout();
+            }
+            throw new Error(json.error || 'Terjadi kesalahan sistem');
+          }
+          return json.data;
+        } catch (err) {
+          Swal.fire('Error API', err.message, 'error');
+          throw err;
+        } finally {
+          stopProgressAnimation(timer);
+        }
+      };
+
+      const toggleSidebar = () => {
+        sidebarCollapsed.value = !sidebarCollapsed.value;
+        localStorage.setItem('myclasshub_sidebar_collapsed', sidebarCollapsed.value ? 'true' : 'false');
+      };
+
+      const startDemoMode = async () => {
+        isDemoMode.value = true;
+        localStorage.setItem('myclasshub_demo', 'true');
+        const res = handleDemoRequest('login', { username: 'demo', nama_lengkap: 'Guru Demo, S.Pd.', nama_madrasah: 'MAN Demo' });
+        currentUser.value = res.user;
+        token.value = res.token;
+        localStorage.setItem('myclasshub_user', JSON.stringify(currentUser.value));
+        localStorage.setItem('myclasshub_token', token.value);
+        await loadInitialData();
+        Swal.fire('Mode Demo Aktif', 'Aplikasi berjalan dalam mode demo dengan data contoh.', 'info');
+      };
+
+      const login = async () => {
+        try {
+          isDemoMode.value = false;
+          localStorage.setItem('myclasshub_demo', 'false');
+
+          const data = await apiRequest('login', loginForm.value);
+          currentUser.value = data.user;
+          token.value = data.token;
+          localStorage.setItem('myclasshub_user', JSON.stringify(currentUser.value));
+          localStorage.setItem('myclasshub_token', token.value);
+          await loadInitialData();
+          Swal.fire('Berhasil Masuk', `Selamat datang kembali, ${currentUser.value.nama_lengkap}!`, 'success');
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      const register = async () => {
+        try {
+          isDemoMode.value = false;
+          localStorage.setItem('myclasshub_demo', 'false');
+
+          const data = await apiRequest('register', regForm.value);
+          currentUser.value = data.user;
+          token.value = data.token;
+          localStorage.setItem('myclasshub_user', JSON.stringify(currentUser.value));
+          localStorage.setItem('myclasshub_token', token.value);
+          await loadInitialData();
+          Swal.fire('Pendaftaran Berhasil', 'Akun guru baru telah terdaftar!', 'success');
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      const logout = () => {
+        currentUser.value = null;
+        token.value = '';
+        isDemoMode.value = false;
+        localStorage.removeItem('myclasshub_user');
+        localStorage.removeItem('myclasshub_token');
+        localStorage.setItem('myclasshub_demo', 'false');
+      };
+
+      const loadInitialData = async () => {
+        if (!currentUser.value) return;
+        const [clsList, subList, stList, jList] = await Promise.all([
+          apiRequest('getClasses'),
+          apiRequest('getSubjects'),
+          apiRequest('getStudents'),
+          apiRequest('getJournals')
+        ]);
+
+        classes.value = Array.isArray(clsList) ? clsList : [];
+        subjects.value = Array.isArray(subList) ? subList : [];
+        students.value = Array.isArray(stList) ? stList : [];
+        journals.value = Array.isArray(jList) ? jList : [];
+
+        if (classes.value.length > 0 && !selectedClassId.value) {
+          selectedClassId.value = classes.value[0].id;
+        }
+        if (subjects.value.length > 0 && !selectedSubjectId.value) {
+          selectedSubjectId.value = subjects.value[0].id;
+        }
+
+        if (selectedClassId.value) {
+          await syncAllData();
+        }
+      };
+
+      // Explicit Sync Data Function
+      const syncAllData = async () => {
+        if (!selectedClassId.value) return;
+        const [fetchedAtts, fetchedGrades] = await Promise.all([
+          apiRequest('getAttendances', { class_id: selectedClassId.value }),
+          apiRequest('getGrades', { class_id: selectedClassId.value })
+        ]);
+
+        if (Array.isArray(fetchedAtts)) attendances.value = fetchedAtts;
+        if (Array.isArray(fetchedGrades)) grades.value = fetchedGrades;
+
+        await loadAttendanceData();
+      };
+
+      const onClassChange = async () => {
+        await syncAllData();
+      };
+
+      const selectedClassStudents = computed(() => {
+        return students.value.filter(s => s.class_id === selectedClassId.value);
+      });
+
+      const currentClassName = computed(() => {
+        const c = classes.value.find(cls => cls.id === selectedClassId.value);
+        return c ? c.name : 'Belum Memilih Kelas';
+      });
+
+      const getClassName = (classId) => {
+        const c = classes.value.find(cls => cls.id === classId);
+        return c ? c.name : 'Kelas';
+      };
+
+      const getSubjectName = (subjectId) => {
+        const s = subjects.value.find(sub => sub.id === subjectId);
+        return s ? s.name : '-';
+      };
+
+      // Kelas & Mapel CRUD
+      const addClass = async () => {
+        if (!newClassName.value) return;
+        const res = await apiRequest('createClass', { name: newClassName.value });
+        classes.value.push({ id: res.id, name: newClassName.value });
+        if (!selectedClassId.value) selectedClassId.value = res.id;
+        newClassName.value = '';
+        Swal.fire('Tersimpan', 'Kelas baru telah ditambahkan.', 'success');
+      };
+
+      const deleteClass = async (id) => {
+        const conf = await Swal.fire({ title: 'Hapus Kelas?', text: 'Data tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true });
+        if (conf.isConfirmed) {
+          await apiRequest('deleteClass', { id });
+          classes.value = classes.value.filter(c => c.id !== id);
+          if (selectedClassId.value === id) {
+            selectedClassId.value = classes.value.length > 0 ? classes.value[0].id : '';
+          }
+          Swal.fire('Terhapus', 'Kelas telah dihapus.', 'success');
+        }
+      };
+
+      const addSubject = async () => {
+        if (!newSubjectName.value) return;
+        const res = await apiRequest('createSubject', { name: newSubjectName.value });
+        subjects.value.push({ id: res.id, name: newSubjectName.value });
+        if (!selectedSubjectId.value) selectedSubjectId.value = res.id;
+        newSubjectName.value = '';
+        Swal.fire('Tersimpan', 'Mata pelajaran baru telah ditambahkan.', 'success');
+      };
+
+      const deleteSubject = async (id) => {
+        const conf = await Swal.fire({ title: 'Hapus Mapel?', text: 'Data tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true });
+        if (conf.isConfirmed) {
+          await apiRequest('deleteSubject', { id });
+          subjects.value = subjects.value.filter(s => s.id !== id);
+          if (selectedSubjectId.value === id) {
+            selectedSubjectId.value = subjects.value.length > 0 ? subjects.value[0].id : '';
+          }
+          Swal.fire('Terhapus', 'Mata pelajaran telah dihapus.', 'success');
+        }
+      };
+
+      // Student CRUD & Excel Import
+      const openStudentModal = async (student = null) => {
+        const { value: formValues } = await Swal.fire({
+          title: student ? 'Edit Data Siswa' : 'Tambah Siswa Baru',
+          html:
+            `<input id="swal-st-name" class="swal2-input" placeholder="Nama Lengkap Siswa" value="${student ? student.name : ''}">` +
+            `<input id="swal-st-nisn" class="swal2-input" placeholder="NISN" value="${student ? (student.nisn || '') : ''}">`,
+          focusConfirm: false,
+          showCancelButton: true,
+          preConfirm: () => {
+            return {
+              name: document.getElementById('swal-st-name').value,
+              nisn: document.getElementById('swal-st-nisn').value
+            };
+          }
+        });
+
+        if (formValues && formValues.name) {
+          if (student) {
+            await apiRequest('updateStudent', { id: student.id, class_id: selectedClassId.value, name: formValues.name, nisn: formValues.nisn });
+            const idx = students.value.findIndex(s => s.id === student.id);
+            if (idx !== -1) {
+              students.value[idx].name = formValues.name;
+              students.value[idx].nisn = formValues.nisn;
+            }
+          } else {
+            const res = await apiRequest('createStudent', { class_id: selectedClassId.value, name: formValues.name, nisn: formValues.nisn });
+            students.value.push({ id: res.id, class_id: selectedClassId.value, name: formValues.name, nisn: formValues.nisn });
+          }
+          Swal.fire('Berhasil', 'Data siswa disimpan!', 'success');
+        }
+      };
+
+      const deleteStudent = async (id) => {
+        const conf = await Swal.fire({ title: 'Hapus Siswa?', icon: 'warning', showCancelButton: true });
+        if (conf.isConfirmed) {
+          await apiRequest('deleteStudent', { id });
+          students.value = students.value.filter(s => s.id !== id);
+          Swal.fire('Terhapus', 'Siswa dihapus dari database.', 'success');
+        }
+      };
+
+      const downloadStudentTemplate = () => {
+        const templateData = [
+          { 'NISN': '005123001', 'NAMA SISWA': 'Aisa Kianlau' },
+          { 'NISN': '005123002', 'NAMA SISWA': 'Anita Arey' }
+        ];
+        const ws = XLSX.utils.json_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Template');
+        XLSX.writeFile(wb, 'Template_Import_Siswa.xlsx');
+      };
+
+      const importStudentsExcel = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+          const importedList = jsonData.map(row => ({
+            name: row['NAMA SISWA'] || row['Nama Siswa'] || row['Nama'] || '',
+            nisn: String(row['NISN'] || row['nisn'] || '-')
+          })).filter(s => s.name);
+
+          if (importedList.length === 0) {
+            Swal.fire('Import Gagal', 'Format file tidak sesuai atau data kosong.', 'error');
+            return;
+          }
+
+          await apiRequest('importStudentsBatch', { class_id: selectedClassId.value, students: importedList });
+          const refreshedStudents = await apiRequest('getStudents');
+          students.value = Array.isArray(refreshedStudents) ? refreshedStudents : [];
+
+          Swal.fire('Import Berhasil', `${importedList.length} siswa berhasil dimasukkan ke kelas ${currentClassName.value}`, 'success');
+        };
+        reader.readAsArrayBuffer(file);
+      };
+
+      // Attendance Functions
+      const loadAttendanceData = async () => {
+        if (!selectedClassId.value || !selectedSubjectId.value) return;
+        
+        const fetchedAtts = await apiRequest('getAttendances', {
+          date: attendanceDate.value,
+          class_id: selectedClassId.value,
+          subject_id: selectedSubjectId.value
+        });
+
+        if (Array.isArray(fetchedAtts)) {
+          fetchedAtts.forEach(fa => {
+            const idx = attendances.value.findIndex(a => 
+              a.id === fa.id || 
+              (a.student_id === fa.student_id && normalizeDate(a.date) === normalizeDate(fa.date) && a.subject_id === fa.subject_id)
+            );
+            if (idx !== -1) attendances.value[idx] = fa;
+            else attendances.value.push(fa);
+          });
+        }
+
+        const attMap = {};
+        selectedClassStudents.value.forEach(s => {
+          const found = attendances.value.find(a => 
+            a.student_id === s.id && 
+            normalizeDate(a.date) === attendanceDate.value && 
+            a.subject_id === selectedSubjectId.value
+          );
+          attMap[s.id] = found ? found.status : '';
+        });
+        currentAttendance.value = attMap;
+      };
+
+      const setAttendanceStatus = (studentId, status) => {
+        currentAttendance.value[studentId] = status;
+      };
+
+      const markAllPresent = () => {
+        selectedClassStudents.value.forEach(s => {
+          currentAttendance.value[s.id] = 'H';
+        });
+      };
+
+      const saveAttendance = async () => {
+        const payloadAtt = Object.keys(currentAttendance.value)
+          .filter(student_id => currentAttendance.value[student_id])
+          .map(student_id => ({
+            student_id,
+            status: currentAttendance.value[student_id]
+          }));
+
+        if (payloadAtt.length === 0) {
+          Swal.fire('Peringatan', 'Silakan pilih status kehadiran siswa terlebih dahulu.', 'warning');
+          return;
+        }
+
+        await apiRequest('saveAttendanceBulk', {
+          date: attendanceDate.value,
+          class_id: selectedClassId.value,
+          subject_id: selectedSubjectId.value,
+          attendances: payloadAtt
+        });
+
+        payloadAtt.forEach(item => {
+          const idx = attendances.value.findIndex(a => 
+            a.student_id === item.student_id && 
+            normalizeDate(a.date) === attendanceDate.value && 
+            a.subject_id === selectedSubjectId.value
+          );
+          if (idx !== -1) {
+            attendances.value[idx].status = item.status;
+          } else {
+            attendances.value.push({
+              id: Date.now().toString() + Math.random(),
+              student_id: item.student_id,
+              date: attendanceDate.value,
+              class_id: selectedClassId.value,
+              subject_id: selectedSubjectId.value,
+              status: item.status
+            });
+          }
+        });
+
+        Swal.fire('Tersimpan', 'Presensi harian berhasil diperbarui/disimpan!', 'success');
+      };
+
+      const liveAttStats = computed(() => {
+        let H = 0, I = 0, S = 0, A = 0;
+        selectedClassStudents.value.forEach(s => {
+          const status = currentAttendance.value[s.id];
+          if (status === 'H') H++;
+          else if (status === 'I') I++;
+          else if (status === 'S') S++;
+          else if (status === 'A') A++;
+        });
+        return { H, I, S, A, total: selectedClassStudents.value.length };
+      });
+
+      const daysInSelectedMonth = computed(() => {
+        if (!recapMonth.value) return 31;
+        const [year, month] = recapMonth.value.split('-').map(Number);
+        return new Date(year, month, 0).getDate();
+      });
+
+      const loadMonthlyRecapData = async () => {
+        if (!selectedClassId.value) return;
+        const fetchedAtts = await apiRequest('getAttendances', {
+          class_id: selectedClassId.value
+        });
+        if (Array.isArray(fetchedAtts)) {
+          attendances.value = fetchedAtts;
+        }
+      };
+
+      const getStudentDayStatus = (studentId, dayNum) => {
+        const formattedDay = String(dayNum).padStart(2, '0');
+        const targetDate = `${recapMonth.value}-${formattedDay}`;
+        const found = attendances.value.find(a => 
+          a.student_id === studentId && 
+          normalizeDate(a.date) === targetDate && 
+          a.subject_id === selectedSubjectId.value
+        );
+        return found ? found.status : '';
+      };
+
+      const getStudentRecapTotals = (studentId) => {
+        let H = 0, I = 0, S = 0, A = 0;
+        const days = daysInSelectedMonth.value;
+        for (let d = 1; d <= days; d++) {
+          const st = getStudentDayStatus(studentId, d);
+          if (st === 'H') H++;
+          else if (st === 'I') I++;
+          else if (st === 'S') S++;
+          else if (st === 'A') A++;
+        }
+        const totalRecorded = H + I + S + A;
+        const percent = totalRecorded === 0 ? 100 : ((H / totalRecorded) * 100).toFixed(0);
+        return { H, I, S, A, percent };
+      };
+
+      const exportMonthlyAttExcel = () => {
+        const days = daysInSelectedMonth.value;
+        const exportData = selectedClassStudents.value.map((s, idx) => {
+          const row = {
+            'No': idx + 1,
+            'NISN': s.nisn || '-',
+            'Nama Siswa': s.name
+          };
+          
+          for (let d = 1; d <= days; d++) {
+            row[`Tgl ${d}`] = getStudentDayStatus(s.id, d) || '-';
+          }
+
+          const totals = getStudentRecapTotals(s.id);
+          row['Total H'] = totals.H;
+          row['Total I'] = totals.I;
+          row['Total S'] = totals.S;
+          row['Total A'] = totals.A;
+          row['% Kehadiran'] = `${totals.percent}%`;
+          return row;
+        });
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Rekap Bulanan');
+        XLSX.writeFile(wb, `Rekap_Presensi_Bulanan_${currentClassName.value}_${recapMonth.value}.xlsx`);
+      };
+
+      // Grades Functions
+      const loadGradesData = async () => {
+        if (!selectedClassId.value || !selectedSubjectId.value) return;
+        const fetchedGrades = await apiRequest('getGrades', {
+          class_id: selectedClassId.value,
+          subject_id: selectedSubjectId.value
+        });
+        if (Array.isArray(fetchedGrades)) {
+          grades.value = fetchedGrades;
+          const gMap = {};
+          fetchedGrades.forEach(g => {
+            gMap[`${g.student_id}_${g.type}`] = g.score;
+          });
+          currentGrades.value = gMap;
+        }
+      };
+
+      const calculateStudentGradeAverage = (studentId) => {
+        const uh1 = currentGrades.value[`${studentId}_UH1`] || 0;
+        const uh2 = currentGrades.value[`${studentId}_UH2`] || 0;
+        const uts = currentGrades.value[`${studentId}_UTS`] || 0;
+        const uas = currentGrades.value[`${studentId}_UAS`] || 0;
+        const list = [uh1, uh2, uts, uas].filter(v => v > 0);
+        if (list.length === 0) return 0;
+        return (list.reduce((a, b) => a + b, 0) / list.length).toFixed(1);
+      };
+
+      const saveGradesBulk = async () => {
+        const promises = [];
+        const types = ['UH1', 'UH2', 'UTS', 'UAS'];
+        
+        selectedClassStudents.value.forEach(s => {
+          types.forEach(t => {
+            const score = currentGrades.value[`${s.id}_${t}`];
+            if (score !== undefined && score !== null && score !== '') {
+              promises.push(apiRequest('saveGrade', {
+                student_id: s.id,
+                subject_id: selectedSubjectId.value,
+                class_id: selectedClassId.value,
+                type: t,
+                score: Number(score)
+              }));
+            }
+          });
+        });
+
+        await Promise.all(promises);
+        Swal.fire('Tersimpan', 'Nilai akademik siswa diperbarui!', 'success');
+      };
+
+      // Journal Functions
+      const saveJournal = async () => {
+        if (journalForm.value.id) {
+          await apiRequest('updateJournal', journalForm.value);
+        } else {
+          await apiRequest('createJournal', {
+            ...journalForm.value,
+            class_id: selectedClassId.value
+          });
+        }
+        const jList = await apiRequest('getJournals');
+        journals.value = Array.isArray(jList) ? jList : [];
+        resetJournalForm();
+        Swal.fire('Tersimpan', 'Jurnal KBM tersimpan!', 'success');
+      };
+
+      const resetJournalForm = () => {
+        journalForm.value = {
+          id: null,
+          date: new Date().toISOString().split('T')[0],
+          subject_id: selectedSubjectId.value,
+          topic: '',
+          activities: ''
+        };
+      };
+
+      const deleteJournal = async (id) => {
+        const conf = await Swal.fire({ title: 'Hapus Jurnal?', icon: 'warning', showCancelButton: true });
+        if (conf.isConfirmed) {
+          await apiRequest('deleteJournal', { id });
+          journals.value = journals.value.filter(j => j.id !== id);
+          Swal.fire('Terhapus', 'Catatan jurnal telah dihapus.', 'success');
+        }
+      };
+
+      // Transparent Parent Report Auto-Fetch Functions
+      const loadReportTab = async () => {
+        if (!selectedClassId.value) return;
+        const fetchedAtts = await apiRequest('getAttendances', {
+          class_id: selectedClassId.value
+        });
+        if (Array.isArray(fetchedAtts)) {
+          attendances.value = fetchedAtts;
+        }
+      };
+
+      const getStudentAttStatsReport = (studentId) => {
+        const targetTargetStr = reportMonthNum.value !== 'ALL' ? `${reportYear.value}-${reportMonthNum.value}` : '';
+        const studentAtts = attendances.value.filter(a => {
+          if (a.student_id !== studentId) return false;
+          if (targetTargetStr) {
+            return normalizeDate(a.date).substring(0, 7) === targetTargetStr;
+          }
+          return true;
+        });
+
+        return {
+          H: studentAtts.filter(a => a.status === 'H').length,
+          I: studentAtts.filter(a => a.status === 'I').length,
+          S: studentAtts.filter(a => a.status === 'S').length,
+          A: studentAtts.filter(a => a.status === 'A').length
+        };
+      };
+
+      const calculateStudentAttPercentReport = (studentId) => {
+        const stats = getStudentAttStatsReport(studentId);
+        const total = stats.H + stats.I + stats.S + stats.A;
+        if (total === 0) return 100;
+        return ((stats.H / total) * 100).toFixed(0);
+      };
+
+      const attendancePercentage = computed(() => {
+        if (selectedClassStudents.value.length === 0) return 0;
+        let totalH = 0, totalDays = 0;
+        selectedClassStudents.value.forEach(s => {
+          const stats = getStudentAttStatsReport(s.id);
+          totalH += stats.H;
+          totalDays += (stats.H + stats.I + stats.S + stats.A);
+        });
+        return totalDays === 0 ? 100 : ((totalH / totalDays) * 100).toFixed(0);
+      });
+
+      const copyPublicLink = () => {
+        if (!selectedClassId.value || !currentUser.value) return;
+        const monthQueryStr = reportMonthNum.value !== 'ALL' ? `${reportYear.value}-${reportMonthNum.value}` : '';
+        const url = `${window.location.origin}${window.location.pathname}?public=1&class_id=${selectedClassId.value}&user_id=${currentUser.value.id}&month=${monthQueryStr}`;
+        
+        const tempInput = document.createElement('input');
+        tempInput.value = url;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Link Berhasil Disalin!',
+          text: 'Link Laporan Transparan Publik telah disalin ke clipboard.',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      };
+
+      const printReport = () => {
+        window.print();
+      };
+
+      const loadPublicReport = async (classId, userId, monthStr) => {
+        publicReportLoading.value = true;
+        try {
+          const res = await fetch(`${apiUrl.value}?action=getPublicReport&class_id=${classId}&user_id=${userId}`);
+          const json = await res.json();
+          if (json.success) {
+            publicReportData.value.students = json.data.students || [];
+            publicReportData.value.attendances = json.data.attendances || [];
+            publicReportData.value.className = json.data.className || 'Aktif';
+            publicReportData.value.schoolName = json.data.schoolName || 'Laporan Transparan';
+            publicReportData.value.teacherName = json.data.teacherName || '';
+            publicReportData.value.monthName = monthStr || '';
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          publicReportLoading.value = false;
+        }
+      };
+
+      const getPublicStudentStats = (studentId) => {
+        const atts = publicReportData.value.attendances.filter(a => a.student_id === studentId);
+        return {
+          H: atts.filter(a => a.status === 'H').length,
+          I: atts.filter(a => a.status === 'I').length,
+          S: atts.filter(a => a.status === 'S').length,
+          A: atts.filter(a => a.status === 'A').length
+        };
+      };
+
+      const calculatePublicStudentPercent = (studentId) => {
+        const stats = getPublicStudentStats(studentId);
+        const total = stats.H + stats.I + stats.S + stats.A;
+        if (total === 0) return 100;
+        return ((stats.H / total) * 100).toFixed(0);
+      };
+
+      const saveApiUrl = () => {
+        localStorage.setItem('myclasshub_api_url', apiUrl.value);
+        isDemoMode.value = false;
+        localStorage.setItem('myclasshub_demo', 'false');
+        Swal.fire('Konfigurasi Disimpan', 'Aplikasi terhubung ke Google Apps Script', 'success');
+      };
+
+      const testApiConnection = async () => {
+        try {
+          const res = await fetch(`${apiUrl.value}?action=ping`);
+          const json = await res.json();
+          if (json.success) {
+            Swal.fire('Koneksi Berhasil', 'API Google Apps Script merespon dengan sukses!', 'success');
+          } else {
+            throw new Error(json.error || 'Respon API tidak valid');
+          }
+        } catch (err) {
+          Swal.fire('Koneksi Gagal', err.message, 'error');
+        }
+      };
+
+      onMounted(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('public') === '1' && urlParams.get('class_id') && urlParams.get('user_id')) {
+          isPublicView.value = true;
+          const publicClassId = urlParams.get('class_id');
+          const publicUserId = urlParams.get('user_id');
+          const publicMonth = urlParams.get('month') || '';
+          loadPublicReport(publicClassId, publicUserId, publicMonth);
+        } else if (currentUser.value) {
+          loadInitialData();
+        }
+      });
+
+      return {
+        apiUrl, isDemoMode, currentUser, token, currentTab, authTab, sidebarCollapsed, mobileMenuOpen, loading,
+        loadingProgress, loadingText, isNotifOpen, notifications, unreadNotificationsCount, handleNotificationClick,
+        loginForm, regForm, classes, selectedClassId, subjects, selectedSubjectId, students,
+        attendances, grades, journals, newClassName, newSubjectName, attendanceDate, currentAttendance, currentGrades,
+        attMode, monthsList, yearsList, recapMonthNum, recapYear, recapMonth, reportMonthNum, reportYear, getMonthName,
+        liveAttStats, daysInSelectedMonth, journalForm, isPublicView, publicReportLoading, publicReportData,
+        selectedClassStudents, currentClassName, attendancePercentage, getClassName, getSubjectName,
+        toggleSidebar, login, register, startDemoMode, logout, addClass, deleteClass, addSubject, deleteSubject,
+        openStudentModal, deleteStudent, downloadStudentTemplate, importStudentsExcel, setAttendanceStatus,
+        markAllPresent, saveAttendance, loadAttendanceData, onClassChange, syncAllData, loadMonthlyRecapData, getStudentDayStatus,
+        getStudentRecapTotals, exportMonthlyAttExcel, loadGradesData, calculateStudentGradeAverage, saveGradesBulk,
+        saveJournal, resetJournalForm, deleteJournal, loadReportTab, getStudentAttStatsReport, calculateStudentAttPercentReport,
+        copyPublicLink, printReport, getPublicStudentStats, calculatePublicStudentPercent, saveApiUrl, testApiConnection
+      };
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

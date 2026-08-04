@@ -318,6 +318,10 @@
       flex-wrap: nowrap;
       gap: 1rem;
       overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .app-header::-webkit-scrollbar {
+      display: none;
     }
 
     .content-wrapper {
@@ -459,6 +463,12 @@
     .auth-page-container {
       position: relative;
       overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      width: 100%;
     }
     .auth-orb {
       position: absolute;
@@ -491,6 +501,8 @@
     .auth-card {
       position: relative;
       z-index: 1;
+      width: 100%;
+      max-width: 440px;
     }
 
     .btn-att {
@@ -615,6 +627,13 @@
       <div v-if="publicReportLoading" class="text-center py-5">
         <div class="spinner-border text-info" role="status"></div>
         <p class="text-muted small mt-2">Memuat Laporan Presensi...</p>
+      </div>
+
+      <div v-else-if="publicReportError" class="alert alert-danger bg-dark border-danger text-danger p-4 text-center">
+        <i class="fa-solid fa-triangle-exclamation fa-2x mb-2"></i>
+        <h5 class="fw-bold">Gagal Memuat Laporan Publik</h5>
+        <p class="mb-0 text-muted small">{{ publicReportError }}</p>
+        <p class="mt-2 mb-0" style="font-size: 0.8rem;">Pastikan deployment Google Apps Script diatur ke <strong class="text-light">"Anyone" (Siapa saja)</strong>.</p>
       </div>
 
       <div v-else>
@@ -771,7 +790,7 @@
         <div class="d-flex align-items-center gap-2 flex-nowrap overflow-x-auto py-1">
           <div class="d-flex align-items-center gap-2 px-3 py-1 bg-dark bg-opacity-60 border border-secondary rounded-pill text-info small shadow-sm text-nowrap">
             <i class="fa-solid fa-calendar-days text-accent"></i>
-            <span class="fw-semibold text-light">{{ currentDateString }}</span>
+            <span class="fw-semibold text-light">{{ formattedDateHeader }}</span>
             <span class="text-muted">•</span>
             <i class="fa-solid fa-clock text-accent"></i>
             <span class="fw-bold font-monospace text-info">Lokal: {{ currentTimeString }}</span>
@@ -803,77 +822,74 @@
 
       <div class="content-wrapper">
 
-        <div v-if="!currentUser" class="container py-5 auth-page-container">
+        <div v-if="!currentUser" class="auth-page-container">
           <div class="auth-orb auth-orb-1"></div>
           <div class="auth-orb auth-orb-2"></div>
-          <div class="row justify-content-center">
-            <div class="col-md-5">
-              <div class="card p-4 p-md-5 shadow-lg auth-card">
-                <div class="text-center mb-4">
-                  <div class="brand-icon mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem;">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                  </div>
-                  <h3 class="fw-bold text-light">Digitalisasi Data oleh Guru</h3>
-                  <p class="text-muted small">MAN 2 Seram Bagian Timur • Dibuat oleh Johan R. A.</p>
+          <div class="auth-card">
+            <div class="card p-4 p-md-4 shadow-lg">
+              <div class="text-center mb-3">
+                <div class="brand-icon mx-auto mb-2" style="width: 52px; height: 52px; font-size: 1.5rem;">
+                  <i class="fa-solid fa-graduation-cap"></i>
                 </div>
+                <h4 class="fw-bold text-light mb-1">Digitalisasi Data oleh Guru</h4>
+                <p class="text-muted small mb-0">MAN 2 Seram Bagian Timur • Dibuat oleh Johan R. A.</p>
+              </div>
 
-                <ul class="nav nav-pills nav-justified mb-4 p-1 bg-dark bg-opacity-50 rounded-3 border border-secondary" id="pills-tab">
-                  <li class="nav-item">
-                    <button class="nav-link text-light" :class="{ 'active btn-cyber': authTab === 'login' }" @click="authTab = 'login'">Masuk Guru</button>
-                  </li>
-                  <li class="nav-item">
-                    <button class="nav-link text-light" :class="{ 'active btn-cyber': authTab === 'register' }" @click="authTab = 'register'">Daftar</button>
-                  </li>
-                </ul>
+              <ul class="nav nav-pills nav-justified mb-3 p-1 bg-dark bg-opacity-50 rounded-3 border border-secondary" id="pills-tab">
+                <li class="nav-item">
+                  <button class="nav-link text-light py-2" :class="{ 'active btn-cyber': authTab === 'login' }" @click="authTab = 'login'">Masuk Guru</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link text-light py-2" :class="{ 'active btn-cyber': authTab === 'register' }" @click="authTab = 'register'">Daftar</button>
+                </li>
+              </ul>
 
-                <form v-if="authTab === 'login'" @submit.prevent="login">
-                  <div class="mb-3">
-                    <label class="form-label text-light">Username Guru</label>
-                    <input type="text" class="form-control" v-model="loginForm.username" required placeholder="guruman2">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label text-light">Password</label>
-                    <input type="password" class="form-control" v-model="loginForm.password" required placeholder="••••••••">
-                  </div>
-                  <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
-                    <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
-                    {{ loading ? 'Mohon tunggu, loading DB...' : 'Masuk System Guru' }}
-                  </button>
-                </form>
-
-                <form v-if="authTab === 'register'" @submit.prevent="register">
-                  <div class="mb-3">
-                    <label class="form-label text-light">Nama Lengkap Guru</label>
-                    <input type="text" class="form-control" v-model="regForm.nama_lengkap" required placeholder="Johan R. A., S.Pd.">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label text-light">Nomor Induk Pegawai (NIP)</label>
-                    <input type="text" class="form-control" v-model="regForm.nip" placeholder="19850101 201001 1 001">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label text-light">Nama Sekolah / Madrasah</label>
-                    <input type="text" class="form-control" v-model="regForm.nama_madrasah" required value="MAN 2 Seram Bagian Timur" placeholder="MAN 2 Seram Bagian Timur">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label text-light">Username Baru</label>
-                    <input type="text" class="form-control" v-model="regForm.username" required placeholder="username">
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label text-light">Password</label>
-                    <input type="password" class="form-control" v-model="regForm.password" required placeholder="••••••••">
-                  </div>
-                  <button type="submit" class="btn btn-cyber w-100 py-2 mt-2" :disabled="loading">
-                    <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
-                    {{ loading ? 'Mohon tunggu, loading DB...' : 'Daftar Akun Baru' }}
-                  </button>
-                </form>
-
-                <div class="text-center mt-4 pt-3 border-top border-secondary">
-                  <button class="btn btn-outline-info w-100 py-2 d-flex align-items-center justify-content-center gap-2" @click="startSupervisionMode" :disabled="loading">
-                    <i class="fa-solid fa-user-shield"></i> Akses Instan Kepala Madrasah & Supervisor
-                  </button>
-                  <small class="d-block text-muted mt-2" style="font-size: 0.78rem;">Mode Supervisi (Read-Only): Tinjau rekap presensi, nilai, dan cetak PDF.</small>
+              <form v-if="authTab === 'login'" @submit.prevent="login">
+                <div class="mb-3">
+                  <label class="form-label text-light">Username Guru</label>
+                  <input type="text" class="form-control" v-model="loginForm.username" required placeholder="guruman2">
                 </div>
+                <div class="mb-3">
+                  <label class="form-label text-light">Password</label>
+                  <input type="password" class="form-control" v-model="loginForm.password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-cyber w-100 py-2 mt-1" :disabled="loading">
+                  <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
+                  {{ loading ? 'Mohon tunggu, loading DB...' : 'Masuk System Guru' }}
+                </button>
+              </form>
+
+              <form v-if="authTab === 'register'" @submit.prevent="register">
+                <div class="mb-2">
+                  <label class="form-label text-light">Nama Lengkap Guru</label>
+                  <input type="text" class="form-control" v-model="regForm.nama_lengkap" required placeholder="Johan R. A., S.Pd.">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label text-light">NIP</label>
+                  <input type="text" class="form-control" v-model="regForm.nip" placeholder="19850101 201001 1 001">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label text-light">Madrasah</label>
+                  <input type="text" class="form-control" v-model="regForm.nama_madrasah" required value="MAN 2 Seram Bagian Timur">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label text-light">Username</label>
+                  <input type="text" class="form-control" v-model="regForm.username" required placeholder="username">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-light">Password</label>
+                  <input type="password" class="form-control" v-model="regForm.password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-cyber w-100 py-2 mt-1" :disabled="loading">
+                  <i v-if="loading" class="fa-solid fa-circle-notch fa-spin me-2"></i>
+                  {{ loading ? 'Mohon tunggu, loading DB...' : 'Daftar Akun Baru' }}
+                </button>
+              </form>
+
+              <div class="text-center mt-3 pt-3 border-top border-secondary">
+                <button class="btn btn-outline-info w-100 py-2 d-flex align-items-center justify-content-center gap-2" @click="startSupervisionMode" :disabled="loading">
+                  <i class="fa-solid fa-user-shield"></i> Akses Instan Kepala Madrasah & Supervisor
+                </button>
               </div>
             </div>
           </div>
@@ -1249,83 +1265,132 @@
                   </div>
                 </div>
               </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="fw-bold text-light mb-0">Tabel Rekapitulasi Presensi Bulanan - Kelas {{ currentClassName }}</h5>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-dark-custom align-middle mb-0 text-center" style="font-size: 0.85rem;">
+                      <thead>
+                        <tr>
+                          <th style="width: 50px;" rowspan="2">NO</th>
+                          <th style="width: 110px;" rowspan="2">NISN</th>
+                          <th class="text-start" rowspan="2">NAMA SISWA</th>
+                          <th :colspan="daysInSelectedMonth">TANGGAL BULAN {{ getMonthName(recapMonthNum).toUpperCase() }} {{ recapYear }}</th>
+                          <th style="width: 45px;" rowspan="2">H</th>
+                          <th style="width: 45px;" rowspan="2">I</th>
+                          <th style="width: 45px;" rowspan="2">S</th>
+                          <th style="width: 45px;" rowspan="2">A</th>
+                          <th style="width: 70px;" rowspan="2">%</th>
+                        </tr>
+                        <tr>
+                          <th v-for="d in daysInSelectedMonth" :key="d" style="width: 32px; padding: 4px; font-size: 0.75rem;">{{ d }}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
+                          <td><strong class="text-info">{{ idx + 1 }}</strong></td>
+                          <td><span class="badge bg-secondary bg-opacity-30 text-light border border-secondary" style="font-size: 0.7rem;">{{ s.nisn || '-' }}</span></td>
+                          <td class="text-start fw-semibold text-light text-nowrap">{{ s.name }}</td>
+                          <td v-for="d in daysInSelectedMonth" :key="d" class="p-1 font-monospace" style="font-size: 0.75rem;">
+                            <span :class="{
+                              'text-success fw-bold': getStudentDayStatus(s.id, d) === 'H',
+                              'text-info fw-bold': getStudentDayStatus(s.id, d) === 'I',
+                              'text-warning fw-bold': getStudentDayStatus(s.id, d) === 'S',
+                              'text-danger fw-bold': getStudentDayStatus(s.id, d) === 'A',
+                              'text-muted': !getStudentDayStatus(s.id, d)
+                            }">{{ getStudentDayStatus(s.id, d) || '-' }}</span>
+                          </td>
+                          <td class="text-success fw-bold">{{ getStudentRecapTotals(s.id).H }}</td>
+                          <td class="text-info fw-bold">{{ getStudentRecapTotals(s.id).I }}</td>
+                          <td class="text-warning fw-bold">{{ getStudentRecapTotals(s.id).S }}</td>
+                          <td class="text-danger fw-bold">{{ getStudentRecapTotals(s.id).A }}</td>
+                          <td class="fw-extrabold text-info">{{ getStudentRecapTotals(s.id).percent }}%</td>
+                        </tr>
+                        <tr v-if="selectedClassStudents.length === 0">
+                          <td :colspan="daysInSelectedMonth + 8" class="p-0">
+                            <div class="empty-state">
+                              <div class="empty-state-icon">
+                                <i class="fa-solid fa-folder-open fa-lg"></i>
+                              </div>
+                              <span class="empty-state-title">Belum ada data siswa di kelas ini</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Academic Grades Tab -->
         <div v-if="currentUser && currentTab === 'grades'">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-              <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-award text-info me-2"></i>Penilaian Akademik Siswa: {{ currentClassName }}</h4>
-              <p class="sub-title-text mb-0">Input nilai Ulangan Harian, UTS, dan UAS.</p>
+              <h4 class="fw-bold text-light mb-1"><i class="fa-solid fa-award text-info me-2"></i>Penilaian Akademik: {{ currentClassName }}</h4>
+              <p class="sub-title-text mb-0">Input nilai Ulangan Harian, UTS, dan UAS siswa.</p>
             </div>
-            <button v-if="!isReadOnlyUser && selectedClassId && selectedClassStudents.length > 0" class="btn btn-cyber" @click="saveGradesBulk" :disabled="isDbProcessing">
-              <i class="fa-solid" :class="isDbProcessing ? 'fa-circle-notch fa-spin me-1' : 'fa-floppy-disk me-1'"></i> 
-              {{ isDbProcessing ? 'Menyimpan Nilai...' : 'Simpan Nilai' }}
-            </button>
+            <div class="d-flex gap-2 align-items-center" v-if="selectedClassId">
+              <select class="form-select form-select-sm" v-model="selectedSubjectId" @change="loadGradesData" style="width: auto;">
+                <option value="" disabled>-- Pilih Mapel --</option>
+                <option v-for="sub in subjects" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
+              </select>
+              <button v-if="!isReadOnlyUser" class="btn btn-cyber btn-sm" @click="saveGradesBulk" :disabled="isDbProcessing">
+                <i class="fa-solid" :class="isDbProcessing ? 'fa-spinner fa-spin me-1' : 'fa-floppy-disk me-1'"></i> Simpan Nilai
+              </button>
+            </div>
           </div>
 
           <div v-if="!selectedClassId" class="alert alert-info bg-dark border-info text-info p-4 mb-4 d-flex align-items-center gap-3">
             <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
             <div>
               <h5 class="fw-bold mb-1">Silakan Pilih Kelas Terlebih Dahulu</h5>
-              <p class="mb-0 text-muted">Pilih kelas pada dropdown header untuk memasukkan atau meninjau nilai akademik siswa.</p>
+              <p class="mb-0 text-muted">Pilih kelas pada dropdown header untuk mengelola penilaian akademik.</p>
             </div>
           </div>
 
-          <div v-if="selectedClassId">
-            <div class="card mb-4">
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label class="form-label">Mata Pelajaran</label>
-                    <select class="form-select" v-model="selectedSubjectId" @change="loadGradesData">
-                      <option value="" disabled>-- Pilih Mapel --</option>
-                      <option v-for="sub in subjects" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-body p-0">
-                <div class="table-responsive">
-                  <table class="table table-dark-custom align-middle mb-0">
-                    <thead>
-                      <tr>
-                        <th style="width: 50px;">NO</th>
-                        <th>NAMA SISWA</th>
-                        <th style="width: 120px;">UH1</th>
-                        <th style="width: 120px;">UH2</th>
-                        <th style="width: 120px;">UTS</th>
-                        <th style="width: 120px;">UAS</th>
-                        <th style="width: 120px;">RATA-RATA</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
-                        <td><span class="fw-bold text-info">{{ idx + 1 }}</span></td>
-                        <td class="fw-semibold text-light">{{ s.name }}</td>
-                        <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UH1']" :disabled="isReadOnlyUser"></td>
-                        <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UH2']" :disabled="isReadOnlyUser"></td>
-                        <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UTS']" :disabled="isReadOnlyUser"></td>
-                        <td><input type="number" min="0" max="100" class="form-control form-control-sm text-center" v-model.number="currentGrades[s.id + '_UAS']" :disabled="isReadOnlyUser"></td>
-                        <td class="fw-bold text-info text-center">{{ calculateStudentGradeAverage(s.id) }}</td>
-                      </tr>
-                      <tr v-if="selectedClassStudents.length === 0">
-                        <td colspan="7" class="p-0">
-                          <div class="empty-state">
-                            <div class="empty-state-icon">
-                              <i class="fa-solid fa-folder-open fa-lg"></i>
-                            </div>
-                            <span class="empty-state-title">Belum ada data siswa di kelas ini untuk dinilai. Tambahkan siswa di menu "Data Siswa".</span>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+          <div class="card" v-if="selectedClassId">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-dark-custom align-middle mb-0 text-center">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">NO</th>
+                      <th>NISN</th>
+                      <th class="text-start">NAMA SISWA</th>
+                      <th style="width: 90px;">UH 1</th>
+                      <th style="width: 90px;">UH 2</th>
+                      <th style="width: 90px;">UTS</th>
+                      <th style="width: 90px;">UAS</th>
+                      <th style="width: 100px;">RATA-RATA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(s, idx) in selectedClassStudents" :key="s.id">
+                      <td><strong class="text-info">{{ idx + 1 }}</strong></td>
+                      <td><span class="badge bg-secondary bg-opacity-30 text-light border border-secondary">{{ s.nisn || '-' }}</span></td>
+                      <td class="text-start fw-semibold text-light">{{ s.name }}</td>
+                      <td><input type="number" class="form-control form-control-sm text-center font-monospace" v-model.number="currentGrades[`${s.id}_UH1`]" min="0" max="100" :disabled="isReadOnlyUser"></td>
+                      <td><input type="number" class="form-control form-control-sm text-center font-monospace" v-model.number="currentGrades[`${s.id}_UH2`]" min="0" max="100" :disabled="isReadOnlyUser"></td>
+                      <td><input type="number" class="form-control form-control-sm text-center font-monospace" v-model.number="currentGrades[`${s.id}_UTS`]" min="0" max="100" :disabled="isReadOnlyUser"></td>
+                      <td><input type="number" class="form-control form-control-sm text-center font-monospace" v-model.number="currentGrades[`${s.id}_UAS`]" min="0" max="100" :disabled="isReadOnlyUser"></td>
+                      <td><span class="fw-extrabold text-info">{{ calculateStudentGradeAverage(s.id) }}</span></td>
+                    </tr>
+                    <tr v-if="selectedClassStudents.length === 0">
+                      <td colspan="8" class="p-0">
+                        <div class="empty-state">
+                          <div class="empty-state-icon"><i class="fa-solid fa-folder-open fa-lg"></i></div>
+                          <span class="empty-state-title">Belum ada data siswa di kelas ini</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1666,12 +1731,12 @@
 
       const currentTimeString = ref('');
       const currentWibTimeString = ref('');
-      const currentDateString = ref('');
+      const formattedDateHeader = ref('');
       let clockTimer = null;
 
       const updateLiveClock = () => {
         const now = new Date();
-        currentDateString.value = now.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+        formattedDateHeader.value = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: '2-digit', year: 'numeric' });
         currentTimeString.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
         currentWibTimeString.value = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
       };
@@ -1712,6 +1777,7 @@
 
       const isPublicView = ref(false);
       const publicReportLoading = ref(false);
+      const publicReportError = ref('');
       const publicReportData = ref({ schoolName: 'MAN 2 Seram Bagian Timur', className: '', teacherName: '', teacherNip: '', monthName: '', students: [], attendances: [] });
 
       const currentYearStr = new Date().getFullYear().toString();
@@ -1848,31 +1914,43 @@
       const toggleMobileMenu = () => { mobileMenuOpen.value = !mobileMenuOpen.value; };
 
       const startSupervisionMode = async () => {
-        const supUser = {
-          id: 'supervisor_global',
-          username: 'kepalamadrasah',
-          nama_lengkap: 'Kepala Madrasah & Supervisor',
-          nama_madrasah: 'MAN 2 Seram Bagian Timur',
-          nip: '19700101 199503 1 001',
-          role: 'supervisor',
-          isReadOnly: true
-        };
-        currentUser.value = supUser;
-        token.value = 'supervisor_token';
-        localStorage.setItem('digitalisasi_user', JSON.stringify(supUser));
-        localStorage.setItem('digitalisasi_token', token.value);
-        await loadInitialData();
+        let timer = null;
+        try {
+          loading.value = true;
+          timer = startProgressAnimation();
+          const supUser = {
+            id: 'supervisor_global',
+            username: 'kepalamadrasah',
+            nama_lengkap: 'Kepala Madrasah & Supervisor',
+            nama_madrasah: 'MAN 2 Seram Bagian Timur',
+            nip: '19700101 199503 1 001',
+            role: 'supervisor',
+            isReadOnly: true
+          };
+          currentUser.value = supUser;
+          token.value = 'supervisor_token';
+          localStorage.setItem('digitalisasi_user', JSON.stringify(supUser));
+          localStorage.setItem('digitalisasi_token', token.value);
+          await loadInitialData();
 
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'info',
-          title: 'Mode Supervisi Aktif',
-          text: 'Masuk sebagai Kepala Madrasah (Read-Only).',
-          timer: 2500,
-          showConfirmButton: false,
-          timerProgressBar: true
-        });
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: 'Mode Supervisi Aktif',
+            text: 'Masuk sebagai Kepala Madrasah (Read-Only).',
+            timer: 2500,
+            showConfirmButton: false,
+            timerProgressBar: true
+          });
+        } catch (e) {
+          logError(e, 'startSupervisionMode');
+          Swal.fire('Error', e.message || 'Gagal masuk Mode Supervisi', 'error');
+        } finally {
+          loading.value = false;
+          isDbProcessing.value = false;
+          stopProgressAnimation(timer);
+        }
       };
 
       const loadInitialData = async () => {
@@ -1950,6 +2028,9 @@
         currentUser.value = null;
         token.value = '';
         selectedClassId.value = '';
+        loading.value = false;
+        isDbProcessing.value = false;
+        mobileMenuOpen.value = false;
         localStorage.removeItem('digitalisasi_user');
         localStorage.removeItem('digitalisasi_token');
         currentTab.value = 'dashboard';
@@ -2320,6 +2401,21 @@
         }
       };
 
+      const getPublicStudentStats = (studentId) => {
+        const atts = publicReportData.value.attendances.filter(a => String(a.student_id) === String(studentId));
+        const dateMap = {};
+        atts.forEach(a => { const d = normalizeDate(a.date); if (!dateMap[d] || a.status === 'H') dateMap[d] = a.status; });
+        let H = 0, I = 0, S = 0, A = 0;
+        Object.values(dateMap).forEach(st => { if (st === 'H') H++; else if (st === 'I') I++; else if (st === 'S') S++; else if (st === 'A') A++; });
+        return { H, I, S, A };
+      };
+
+      const calculatePublicStudentPercent = (studentId) => {
+        const st = getPublicStudentStats(studentId);
+        const tot = st.H + st.I + st.S + st.A;
+        return tot === 0 ? 0 : ((st.H / tot) * 100).toFixed(0);
+      };
+
       onMounted(() => {
         updateLiveClock();
         clockTimer = setInterval(updateLiveClock, 1000);
@@ -2327,8 +2423,21 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('public') === '1' && urlParams.get('class_id') && urlParams.get('user_id')) {
           isPublicView.value = true;
+          publicReportLoading.value = true;
+          publicReportError.value = '';
+
           fetch(`${apiUrl.value}?action=getPublicReport&class_id=${urlParams.get('class_id')}&user_id=${urlParams.get('user_id')}`)
-            .then(res => res.json()).then(json => {
+            .then(res => {
+              if (!res.ok) throw new Error(`HTTP Error status ${res.status}`);
+              return res.text();
+            })
+            .then(rawText => {
+              let json;
+              try {
+                json = JSON.parse(rawText);
+              } catch (e) {
+                throw new Error('Respon server bukan format JSON yang valid. Pastikan deployment GAS diatur ke "Anyone".');
+              }
               if (json.success) {
                 publicReportData.value.students = json.data.students || [];
                 publicReportData.value.attendances = json.data.attendances || [];
@@ -2336,7 +2445,16 @@
                 publicReportData.value.schoolName = json.data.schoolName || 'MAN 2 Seram Bagian Timur';
                 publicReportData.value.teacherName = json.data.teacherName || 'Guru Pengampu';
                 publicReportData.value.teacherNip = json.data.teacherNip || '-';
+              } else {
+                throw new Error(json.error || 'Gagal memuat rekap data.');
               }
+            })
+            .catch(err => {
+              console.error('Public report fetch error:', err);
+              publicReportError.value = err.message;
+            })
+            .finally(() => {
+              publicReportLoading.value = false;
             });
         } else if (currentUser.value) {
           loadInitialData();
@@ -2352,7 +2470,7 @@
         loginForm, regForm, classes, selectedClassId, subjects, selectedSubjectId, students, attendances, grades, journals,
         newClassName, newSubjectName, attendanceDate, currentAttendance, currentGrades, attMode, monthsList, yearsList,
         recapMonthNum, recapYear, recapMonth, reportMonthNum, reportYear, getMonthName, daysInSelectedMonth, journalForm,
-        isPublicView, publicReportLoading, publicReportData, selectedClassStudents, currentClassName, attendancePercentage,
+        isPublicView, publicReportLoading, publicReportError, publicReportData, selectedClassStudents, currentClassName, attendancePercentage,
         getClassName, getSubjectName, toggleSidebar, toggleMobileMenu, startSupervisionMode, login, register, logout,
         openProfileModal, profileForm, saveProfile,
         addClass, deleteClass, addSubject, deleteSubject, openStudentModal, deleteStudent, downloadStudentTemplate,
@@ -2360,7 +2478,8 @@
         loadMonthlyRecapData, getStudentDayStatus, getStudentRecapTotals, exportMonthlyAttExcel, loadGradesData,
         calculateStudentGradeAverage, saveGradesBulk, saveJournal, resetJournalForm, deleteJournal, loadReportTab,
         getStudentAttStatsReport, calculateStudentAttPercentReport, copyPublicLink, printReport, saveApiUrl, testApiConnection,
-        errorLogs, clearErrorLogs, currentTimeString, currentWibTimeString, currentDateString
+        errorLogs, clearErrorLogs, currentTimeString, currentWibTimeString, formattedDateHeader,
+        getPublicStudentStats, calculatePublicStudentPercent
       };
     }
   }).mount('#app');

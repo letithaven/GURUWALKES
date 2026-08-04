@@ -435,18 +435,113 @@
       box-shadow: 0 0 10px var(--accent-cyan-glow);
     }
 
+    /* Mobile menu toggle: hidden on desktop, shown only under the breakpoint below */
+    .mobile-menu-toggle {
+      display: none;
+    }
+
+    /* Off-canvas overlay behind the mobile sidebar */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 999;
+      animation: fadeInUp 0.2s ease-out;
+    }
+
     @media (max-width: 991.98px) {
       .app-sidebar {
         transform: translateX(-100%);
+        width: min(var(--sidebar-width), 82vw);
+      }
+      .app-sidebar.collapsed {
+        width: min(var(--sidebar-width), 82vw);
+      }
+      .app-sidebar.collapsed .sidebar-brand span,
+      .app-sidebar.collapsed .menu-link span,
+      .app-sidebar.collapsed .user-info-text,
+      .app-sidebar.collapsed .btn-hide-text {
+        display: revert !important;
       }
       .app-sidebar.mobile-open {
         transform: translateX(0);
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5);
       }
-      .app-main {
+      .app-main, .app-main.expanded {
         margin-left: 0 !important;
       }
+
+      .mobile-menu-toggle {
+        display: inline-flex;
+      }
+      .desktop-collapse-toggle {
+        display: none;
+      }
+
       .progress-bottom-bar {
         left: 15px; right: 15px; bottom: 15px;
+      }
+
+      /* Header: allow wrapping and shrink the class picker so nothing overflows */
+      .app-header {
+        flex-wrap: wrap;
+        row-gap: 0.6rem;
+        padding: 0.75rem 1rem;
+      }
+      .app-header > div {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+      }
+      .header-class-select select {
+        max-width: 40vw;
+      }
+
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      /* Cards and headers a touch tighter on small screens */
+      .card-header {
+        padding: 1rem 1.1rem;
+      }
+
+      /* Auth (login/register) card fills the screen comfortably */
+      .container.py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+      }
+
+      /* Keep every data table horizontally scrollable with a visible scrollbar hint */
+      .table-responsive {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .table-matrix .col-student {
+        min-width: 140px;
+      }
+
+      /* Notification dropdown shouldn't overflow the viewport width */
+      .dropdown-menu {
+        max-width: 90vw;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .sidebar-brand {
+        padding: 1.25rem 1rem;
+        font-size: 1.1rem;
+      }
+      h3.fw-bold, h4.fw-bold {
+        font-size: 1.15rem;
+      }
+      .btn-att {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+      }
+      .header-class-select select {
+        max-width: 32vw;
+        font-size: 0.8rem;
       }
     }
 
@@ -543,7 +638,7 @@
         <span>MyClassHub</span>
       </a>
       
-      <ul class="sidebar-menu">
+      <ul class="sidebar-menu" @click.capture="mobileMenuOpen = false">
         <li class="menu-item" :class="{ active: currentTab === 'dashboard' }">
           <a class="menu-link" @click="currentTab = 'dashboard'" title="Dashboard">
             <i class="fa-solid fa-chart-pie"></i>
@@ -602,15 +697,23 @@
       </div>
     </aside>
 
+    <!-- Overlay to close off-canvas sidebar on mobile -->
+    <div v-if="mobileMenuOpen" class="sidebar-overlay" @click="toggleMobileMenu"></div>
+
     <div class="app-main" :class="{ 'expanded': sidebarCollapsed, 'auth-mode': !currentUser }">
       <!-- Navbar Header -->
       <header class="app-header" v-if="currentUser">
         <div class="d-flex align-items-center gap-3">
-          <button class="btn btn-outline-cyber btn-sm" @click="toggleSidebar" title="Sembunyikan / Buka Sidebar">
+          <!-- Mobile hamburger: opens off-canvas sidebar on small screens -->
+          <button class="btn btn-outline-cyber btn-sm mobile-menu-toggle" @click="toggleMobileMenu" title="Buka Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+          <button class="btn btn-outline-cyber btn-sm desktop-collapse-toggle" @click="toggleSidebar" title="Sembunyikan / Buka Sidebar">
             <i class="fa-solid" :class="sidebarCollapsed ? 'fa-indent' : 'fa-bars'"></i>
           </button>
           
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 header-class-select">
             <i class="fa-solid fa-school text-info"></i>
             <select class="form-select form-select-sm fw-bold border-0" v-model="selectedClassId" style="width: auto;" @change="onClassChange">
               <option value="" disabled>-- Pilih Kelas Active --</option>
@@ -1625,6 +1728,10 @@
         localStorage.setItem('myclasshub_sidebar_collapsed', sidebarCollapsed.value ? 'true' : 'false');
       };
 
+      const toggleMobileMenu = () => {
+        mobileMenuOpen.value = !mobileMenuOpen.value;
+      };
+
       const startDemoMode = async () => {
         isDemoMode.value = true;
         localStorage.setItem('myclasshub_demo', 'true');
@@ -2273,7 +2380,7 @@
         attMode, monthsList, yearsList, recapMonthNum, recapYear, recapMonth, reportMonthNum, reportYear, getMonthName,
         liveAttStats, daysInSelectedMonth, journalForm, isPublicView, publicReportLoading, publicReportData,
         selectedClassStudents, currentClassName, attendancePercentage, getClassName, getSubjectName,
-        toggleSidebar, login, register, startDemoMode, logout, addClass, deleteClass, addSubject, deleteSubject,
+        toggleSidebar, toggleMobileMenu, login, register, startDemoMode, logout, addClass, deleteClass, addSubject, deleteSubject,
         openStudentModal, deleteStudent, downloadStudentTemplate, importStudentsExcel, setAttendanceStatus,
         markAllPresent, saveAttendance, loadAttendanceData, onClassChange, syncAllData, loadMonthlyRecapData, getStudentDayStatus,
         getStudentRecapTotals, exportMonthlyAttExcel, loadGradesData, calculateStudentGradeAverage, saveGradesBulk,
